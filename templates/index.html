@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BreathSafe – AQI Monitor</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f7fb;
+    margin:0;
+}
+header{
+    background:#203a43;
+    color:white;
+    padding:15px;
+    text-align:center;
+}
+.container{
+    padding:30px;
+}
+select, button{
+    padding:10px;
+    margin:10px 0;
+    width:100%;
+}
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+.status{
+    font-size:18px;
+    font-weight:bold;
+}
+.good{color:green}
+.moderate{color:orange}
+.poor{color:red}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🫁 BreathSafe – Air Quality Advisor</h1>
+</header>
+
+<div class="container">
+    <div class="card">
+        <label>Select District</label>
+        <select id="city">
+            <option value="">-- Select --</option>
+            <option>Bengaluru</option>
+            <option>Mysuru</option>
+            <option>Hassan</option>
+            <option>Tumakuru</option>
+            <option>Mangaluru</option>
+            <option>Udupi</option>
+        </select>
+
+        <label>Health Condition</label>
+        <select id="condition">
+            <option>Asthma</option>
+            <option>COPD</option>
+            <option>Allergy</option>
+        </select>
+
+        <button onclick="checkAQI()">Check AQI</button>
+
+        <p id="result">AQI: --</p>
+        <p class="status" id="status">Status: --</p>
+        <p id="advice"></p>
+    </div>
+</div>
+
+<script>
+function checkAQI(){
+    const city = document.getElementById("city").value;
+    const condition = document.getElementById("condition").value;
+
+    if(city===""){
+        alert("Select a city");
+        return;
+    }
+
+    fetch("/getAQI",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({city, condition})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        document.getElementById("result").innerText = "AQI: " + data.aqi;
+        document.getElementById("advice").innerText = data.advice;
+
+        const status = document.getElementById("status");
+        if(data.aqi <= 50){
+            status.innerText = "Status: Safe";
+            status.className = "status good";
+        }else if(data.aqi <= 100){
+            status.innerText = "Status: Moderate";
+            status.className = "status moderate";
+        }else{
+            status.innerText = "Status: Unsafe";
+            status.className = "status poor";
+        }
+    });
+}
+</script>
+
+</body>
+</html>
