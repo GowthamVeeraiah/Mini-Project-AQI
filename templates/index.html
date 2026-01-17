@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BreathSafe – Smart Patient Safety System</title>
+<title>BreathSafe – AQI Patient Safety System</title>
 
 <style>
+/* ===== BASE ===== */
+*{box-sizing:border-box}
 body{
     margin:0;
-    font-family:Segoe UI, sans-serif;
+    font-family:"Segoe UI",sans-serif;
     background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
     color:white;
 }
@@ -15,18 +17,27 @@ header{
     text-align:center;
     padding:25px;
 }
+header h1{margin:0}
+header p{opacity:0.9}
+
+/* ===== LAYOUT ===== */
 .container{
-    max-width:1100px;
+    max-width:1200px;
     margin:auto;
     padding:20px;
 }
 .card{
     background:rgba(255,255,255,0.15);
-    backdrop-filter:blur(12px);
+    backdrop-filter:blur(14px);
     border-radius:18px;
     padding:25px;
     margin-bottom:25px;
-    box-shadow:0 15px 35px rgba(0,0,0,0.3);
+    box-shadow:0 15px 35px rgba(0,0,0,0.35);
+}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:20px;
 }
 select,button{
     width:100%;
@@ -41,51 +52,55 @@ button{
     font-size:16px;
     cursor:pointer;
 }
+button:hover{opacity:0.9}
 
-/* LUNGS */
+/* ===== LUNGS ===== */
 .lungs{
     display:flex;
     justify-content:center;
     gap:30px;
+    margin:15px 0;
 }
 .lung{
     width:110px;
     height:160px;
     border-radius:60px;
     background:#f1c40f;
-    animation:breath 3s infinite;
+    animation:breath 3s infinite ease-in-out;
 }
 .lung.right{animation-delay:1.5s}
 
 @keyframes breath{
     0%{transform:scaleY(1)}
-    50%{transform:scaleY(1.2)}
+    50%{transform:scaleY(1.25)}
     100%{transform:scaleY(1)}
 }
-
 .good{background:#2ecc71!important}
 .moderate{background:#f1c40f!important}
 .poor{
     background:#e74c3c!important;
     animation:shake 0.5s infinite;
 }
-
 @keyframes shake{
     0%{transform:translateX(0)}
-    25%{transform:translateX(-5px)}
-    50%{transform:translateX(5px)}
-    75%{transform:translateX(-5px)}
+    25%{transform:translateX(-4px)}
+    50%{transform:translateX(4px)}
+    75%{transform:translateX(-4px)}
     100%{transform:translateX(0)}
 }
 
-.grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:20px;
-}
+/* ===== LISTS ===== */
+ul{padding-left:18px}
+li{margin-bottom:8px}
+small{opacity:0.85}
 
-ul{padding-left:20px}
-h3{margin-top:0}
+/* ===== FOOTER ===== */
+footer{
+    text-align:center;
+    padding:15px;
+    opacity:0.7;
+    font-size:14px;
+}
 </style>
 </head>
 
@@ -93,21 +108,26 @@ h3{margin-top:0}
 
 <header>
 <h1>🫁 BreathSafe</h1>
-<p>AI-Inspired AQI • Patient Safety • Emergency Support</p>
+<p>AQI Forecast • Patient Suitability • Emergency Support</p>
 </header>
 
 <div class="container">
 
+<!-- INPUT CARD -->
 <div class="card">
+<h3>📍 Select Location & Condition</h3>
+
 <select id="city">
 <option value="">-- Select Karnataka District --</option>
 <script>
-["Bagalkote","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar",
-"Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada",
-"Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal",
-"Mandya","Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi",
-"Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"]
-.forEach(d=>document.write(`<option>${d}</option>`));
+[
+"Bagalkote","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban",
+"Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru",
+"Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag",
+"Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya",
+"Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi",
+"Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"
+].forEach(d=>document.write(`<option>${d}</option>`));
 </script>
 </select>
 
@@ -121,6 +141,7 @@ h3{margin-top:0}
 <button onclick="analyze()">🚨 Analyze Patient Safety</button>
 </div>
 
+<!-- LUNG STATUS -->
 <div class="card">
 <h3>🫁 Live Lung Condition</h3>
 <div class="lungs">
@@ -130,16 +151,18 @@ h3{margin-top:0}
 <p id="statusText">Status: --</p>
 </div>
 
+<!-- INFO GRID -->
 <div class="grid">
+
 <div class="card">
 <h3>📊 AQI Forecast</h3>
-<p>Today: <span id="today">--</span></p>
-<p>Tomorrow: <span id="tomorrow">--</span></p>
-<p>Next 48 hrs: <span id="next48">--</span></p>
+<p>Today: <b id="today">--</b></p>
+<p>Tomorrow: <b id="tomorrow">--</b></p>
+<p>Next 48 hrs: <b id="next48">--</b></p>
 </div>
 
 <div class="card">
-<h3>🩺 Suitability</h3>
+<h3>🩺 AQI Suitability</h3>
 <p id="suitability">--</p>
 </div>
 
@@ -152,41 +175,61 @@ h3{margin-top:0}
 <h3>🏥 Nearby Hospitals</h3>
 <ul id="hospitals"></ul>
 </div>
-</div>
 
 </div>
+</div>
+
+<footer>
+Mini Project – 23CS604 | BreathSafe AQI System
+</footer>
 
 <script>
+const city=document.getElementById("city");
+const condition=document.getElementById("condition");
+const lungL=document.getElementById("lungL");
+const lungR=document.getElementById("lungR");
+
 function analyze(){
-fetch("/getAQI",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-city:city.value,
-condition:condition.value
-})
-})
-.then(res=>res.json())
-.then(data=>{
-today.innerText=data.today;
-tomorrow.innerText=data.tomorrow;
-next48.innerText=data.next48;
-statusText.innerText="Status: "+data.status;
-suitability.innerText=data.suitability;
+    if(city.value===""){
+        alert("Please select a district");
+        return;
+    }
 
-lungL.className="lung "+data.level;
-lungR.className="lung right "+data.level;
+    fetch("/getAQI",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            city: city.value,
+            condition: condition.value
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        today.innerText=data.today;
+        tomorrow.innerText=data.tomorrow;
+        next48.innerText=data.next48;
 
-precautions.innerHTML="";
-data.precautions.forEach(p=>{
-precautions.innerHTML+=`<li>${p}</li>`;
-});
+        statusText.innerText="Status: "+data.status;
+        suitability.innerText=data.suitability;
 
-hospitals.innerHTML="";
-data.hospitals.forEach(h=>{
-hospitals.innerHTML+=`<li>${h}</li>`;
-});
-});
+        lungL.className="lung "+data.level;
+        lungR.className="lung right "+data.level;
+
+        precautions.innerHTML="";
+        data.precautions.forEach(p=>{
+            precautions.innerHTML+=`<li>${p}</li>`;
+        });
+
+        hospitals.innerHTML="";
+        data.hospitals.forEach(h=>{
+            hospitals.innerHTML+=`
+                <li>
+                    <b>${h.name}</b><br>
+                    <small>${h.address}</small>
+                </li>
+            `;
+        });
+    });
 }
 </script>
 
