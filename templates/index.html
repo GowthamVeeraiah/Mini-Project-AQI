@@ -2,111 +2,193 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BreathSafe – AQI Monitor</title>
+<title>BreathSafe – Karnataka AQI Monitor</title>
 
 <style>
 body{
-    font-family: Arial, sans-serif;
-    background:#f4f7fb;
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(120deg,#f0f4ff,#e6f7ff);
     margin:0;
 }
 header{
     background:#203a43;
     color:white;
-    padding:15px;
+    padding:18px;
     text-align:center;
 }
 .container{
     padding:30px;
-}
-select, button{
-    padding:10px;
-    margin:10px 0;
-    width:100%;
+    max-width:600px;
+    margin:auto;
 }
 .card{
     background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.1);
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 15px 30px rgba(0,0,0,0.15);
+    transition:0.5s;
 }
+select, button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+button{
+    background:#1f3c88;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+}
+button:hover{opacity:0.9}
+
 .status{
-    font-size:18px;
+    font-size:20px;
     font-weight:bold;
+    margin-top:15px;
 }
-.good{color:green}
-.moderate{color:orange}
-.poor{color:red}
+
+.good{color:#2ecc71}
+.moderate{color:#f1c40f}
+.poor{color:#e74c3c}
+
+.loader{
+    display:none;
+    text-align:center;
+    margin-top:15px;
+}
+
+.bar{
+    height:18px;
+    width:0%;
+    background:#2ecc71;
+    border-radius:10px;
+    margin-top:10px;
+    transition:1s;
+}
 </style>
 </head>
 
 <body>
 
 <header>
-    <h1>🫁 BreathSafe – Air Quality Advisor</h1>
+    <h1>🫁 BreathSafe – Karnataka AQI Advisor</h1>
+    <p>Live Air Suitability for Respiratory Patients</p>
 </header>
 
 <div class="container">
-    <div class="card">
-        <label>Select District</label>
-        <select id="city">
-            <option value="">-- Select --</option>
-            <option>Bengaluru</option>
-            <option>Mysuru</option>
-            <option>Hassan</option>
-            <option>Tumakuru</option>
-            <option>Mangaluru</option>
-            <option>Udupi</option>
-        </select>
+<div class="card" id="card">
 
-        <label>Health Condition</label>
-        <select id="condition">
-            <option>Asthma</option>
-            <option>COPD</option>
-            <option>Allergy</option>
-        </select>
+<label>Select District</label>
+<select id="city">
+<option value="">-- Select District --</option>
+<option>Bagalkote</option>
+<option>Ballari</option>
+<option>Belagavi</option>
+<option>Bengaluru Rural</option>
+<option>Bengaluru Urban</option>
+<option>Bidar</option>
+<option>Chamarajanagar</option>
+<option>Chikkaballapura</option>
+<option>Chikkamagaluru</option>
+<option>Chitradurga</option>
+<option>Dakshina Kannada</option>
+<option>Davanagere</option>
+<option>Dharwad</option>
+<option>Gadag</option>
+<option>Hassan</option>
+<option>Haveri</option>
+<option>Kalaburagi</option>
+<option>Kodagu</option>
+<option>Kolar</option>
+<option>Koppal</option>
+<option>Mandya</option>
+<option>Mysuru</option>
+<option>Raichur</option>
+<option>Ramanagara</option>
+<option>Shivamogga</option>
+<option>Tumakuru</option>
+<option>Udupi</option>
+<option>Uttara Kannada</option>
+<option>Vijayanagara</option>
+<option>Vijayapura</option>
+<option>Yadgir</option>
+</select>
 
-        <button onclick="checkAQI()">Check AQI</button>
+<label>Health Condition</label>
+<select id="condition">
+<option>Asthma</option>
+<option>COPD</option>
+<option>Allergy</option>
+</select>
 
-        <p id="result">AQI: --</p>
-        <p class="status" id="status">Status: --</p>
-        <p id="advice"></p>
-    </div>
+<button onclick="checkAQI()">Check Air Quality</button>
+
+<div class="loader" id="loader">⏳ Checking air quality...</div>
+
+<p id="aqiText">AQI: --</p>
+<div class="bar" id="bar"></div>
+<p class="status" id="status">Status: --</p>
+<p id="advice"></p>
+
+</div>
 </div>
 
 <script>
 function checkAQI(){
-    const city = document.getElementById("city").value;
-    const condition = document.getElementById("condition").value;
+    const city = cityEl.value;
+    if(city===""){ alert("Select a district"); return; }
 
-    if(city===""){
-        alert("Select a city");
-        return;
-    }
+    loader.style.display="block";
+    bar.style.width="0%";
 
     fetch("/getAQI",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({city, condition})
+        body:JSON.stringify({
+            city: city,
+            condition: condition.value
+        })
     })
     .then(res=>res.json())
     .then(data=>{
-        document.getElementById("result").innerText = "AQI: " + data.aqi;
-        document.getElementById("advice").innerText = data.advice;
+        loader.style.display="none";
+        aqiText.innerText="AQI: "+data.aqi;
+        advice.innerText=data.advice;
 
-        const status = document.getElementById("status");
-        if(data.aqi <= 50){
-            status.innerText = "Status: Safe";
-            status.className = "status good";
-        }else if(data.aqi <= 100){
-            status.innerText = "Status: Moderate";
-            status.className = "status moderate";
-        }else{
-            status.innerText = "Status: Unsafe";
-            status.className = "status poor";
+        let percent = Math.min(data.aqi,200)/2;
+        bar.style.width=percent+"%";
+
+        if(data.aqi<=50){
+            status.innerText="Status: Safe";
+            status.className="status good";
+            bar.style.background="#2ecc71";
+            card.style.border="3px solid #2ecc71";
+        }
+        else if(data.aqi<=100){
+            status.innerText="Status: Moderate";
+            status.className="status moderate";
+            bar.style.background="#f1c40f";
+            card.style.border="3px solid #f1c40f";
+        }
+        else{
+            status.innerText="Status: Unsafe";
+            status.className="status poor";
+            bar.style.background="#e74c3c";
+            card.style.border="3px solid #e74c3c";
         }
     });
 }
+
+const cityEl=document.getElementById("city");
+const condition=document.getElementById("condition");
+const loader=document.getElementById("loader");
+const aqiText=document.getElementById("aqiText");
+const advice=document.getElementById("advice");
+const status=document.getElementById("status");
+const bar=document.getElementById("bar");
+const card=document.getElementById("card");
 </script>
 
 </body>
