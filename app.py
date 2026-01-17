@@ -3,7 +3,6 @@ import random
 
 app = Flask(__name__)
 
-# Karnataka districts (for validation / realism)
 KARNATAKA_DISTRICTS = [
     "Bagalkote","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban",
     "Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru",
@@ -23,29 +22,32 @@ def get_aqi():
     city = data.get("city")
     condition = data.get("condition")
 
-    # Safety check
     if city not in KARNATAKA_DISTRICTS:
-        return jsonify({
-            "aqi": 0,
-            "advice": "Invalid district selected."
-        })
+        return jsonify({"error": "Invalid district"})
 
-    # Simulated AQI values (realistic range)
-    aqi = random.randint(40, 180)
+    # Simulated AQI values
+    today_aqi = random.randint(40, 180)
+    tomorrow_aqi = max(20, today_aqi + random.randint(-15, 15))
+    next_48_aqi = max(20, tomorrow_aqi + random.randint(-20, 20))
 
-    # Health-based advice
-    if aqi <= 50:
-        advice = f"Air quality in {city} is good. Safe for {condition} patients."
-    elif aqi <= 100:
-        advice = f"Air quality in {city} is moderate. {condition} patients should limit outdoor activity."
+    # Suitability logic
+    if today_aqi <= 50:
+        suitability = "Suitable"
+        advice = f"Air quality is good. Safe for {condition} patients."
+    elif today_aqi <= 100:
+        suitability = "Moderately Suitable"
+        advice = f"Moderate air quality. {condition} patients should avoid prolonged outdoor activity."
     else:
-        advice = f"Air quality in {city} is poor. {condition} patients should stay indoors."
+        suitability = "Not Suitable"
+        advice = f"Poor air quality. {condition} patients are advised to stay indoors."
 
     return jsonify({
-        "aqi": aqi,
+        "today": today_aqi,
+        "tomorrow": tomorrow_aqi,
+        "next48": next_48_aqi,
+        "suitability": suitability,
         "advice": advice
     })
 
-# Local run (Render will ignore this and use gunicorn)
 if __name__ == "__main__":
     app.run(debug=True)
