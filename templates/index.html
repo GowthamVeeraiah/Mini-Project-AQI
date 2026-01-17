@@ -2,31 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BreathSafe – AQI Forecast System</title>
+<title>BreathSafe – Patient AQI Advisor</title>
 
 <style>
 body{
     font-family:Segoe UI, sans-serif;
-    background:#eef2f7;
+    background:#eef3ff;
     margin:0;
 }
 header{
-    background:#203a43;
+    background:linear-gradient(90deg,#0f2027,#203a43,#2c5364);
     color:white;
     padding:20px;
     text-align:center;
 }
 .container{
-    max-width:700px;
+    max-width:900px;
     margin:auto;
     padding:30px;
 }
 .card{
     background:white;
     padding:25px;
-    border-radius:15px;
-    margin-bottom:20px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.1);
+    border-radius:16px;
+    margin-bottom:25px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.12);
 }
 select,button{
     width:100%;
@@ -37,31 +37,51 @@ button{
     background:#1f3c88;
     color:white;
     border:none;
+    font-size:16px;
     cursor:pointer;
 }
-.good{color:#2ecc71}
-.moderate{color:#f1c40f}
-.poor{color:#e74c3c}
+
+/* LUNGS */
+.lungs{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    margin:20px 0;
+}
+.lung{
+    width:100px;
+    height:150px;
+    border-radius:50px;
+    background:#f1c40f;
+    animation:breath 3s infinite;
+}
+.lung.right{animation-delay:1.5s}
+
+@keyframes breath{
+    0%{transform:scaleY(1)}
+    50%{transform:scaleY(1.15)}
+    100%{transform:scaleY(1)}
+}
+
+.good{background:#2ecc71!important}
+.moderate{background:#f1c40f!important}
+.poor{background:#e74c3c!important}
+
 .forecast{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:15px;
-    margin-top:15px;
-}
-.forecast div{
-    background:#f8f9ff;
-    padding:15px;
-    border-radius:10px;
     text-align:center;
 }
+ul{padding-left:20px}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>🫁 BreathSafe – AQI Forecast & Suitability</h1>
-<p>Today • Tomorrow • Next 48 Hours</p>
+<h1>🫁 BreathSafe – AQI & Patient Safety System</h1>
+<p>Live AQI • Disease Suitability • Emergency Precautions</p>
 </header>
 
 <div class="container">
@@ -70,79 +90,84 @@ button{
 <label>District</label>
 <select id="city">
 <option value="">-- Select District --</option>
-<option>Bagalkote</option><option>Ballari</option><option>Belagavi</option>
-<option>Bengaluru Rural</option><option>Bengaluru Urban</option>
-<option>Bidar</option><option>Chamarajanagar</option>
-<option>Chikkaballapura</option><option>Chikkamagaluru</option>
-<option>Chitradurga</option><option>Dakshina Kannada</option>
-<option>Davanagere</option><option>Dharwad</option><option>Gadag</option>
-<option>Hassan</option><option>Haveri</option><option>Kalaburagi</option>
-<option>Kodagu</option><option>Kolar</option><option>Koppal</option>
-<option>Mandya</option><option>Mysuru</option><option>Raichur</option>
-<option>Ramanagara</option><option>Shivamogga</option><option>Tumakuru</option>
-<option>Udupi</option><option>Uttara Kannada</option>
-<option>Vijayanagara</option><option>Vijayapura</option><option>Yadgir</option>
+<option>Bengaluru Urban</option><option>Mysuru</option><option>Hassan</option>
+<option>Tumakuru</option><option>Mangaluru</option><option>Udupi</option>
+<option>Belagavi</option><option>Ballari</option><option>Bidar</option>
+<option>Kalaburagi</option><option>Shivamogga</option><option>Mandya</option>
 </select>
 
-<label>Health Condition</label>
+<label>Disease</label>
 <select id="condition">
 <option>Asthma</option>
 <option>COPD</option>
-<option>Allergy</option>
+<option>Bronchitis</option>
+<option>Allergic Rhinitis</option>
 </select>
 
-<button onclick="checkAQI()">Analyze Air Quality</button>
+<button onclick="checkAQI()">Analyze AQI</button>
 </div>
 
 <div class="card">
-<h3>📈 AQI Forecast</h3>
+<h3>🫁 Lung Condition (Live)</h3>
+<div class="lungs">
+<div class="lung" id="lungL"></div>
+<div class="lung right" id="lungR"></div>
+</div>
+<p id="statusText">Status: --</p>
+</div>
+
+<div class="card">
+<h3>📊 AQI Forecast</h3>
 <div class="forecast">
-<div>
-<h4>Today</h4>
-<p id="today">--</p>
-</div>
-<div>
-<h4>Tomorrow</h4>
-<p id="tomorrow">--</p>
-</div>
-<div>
-<h4>Next 48 hrs</h4>
-<p id="next48">--</p>
-</div>
+<div><b>Today</b><p id="today">--</p></div>
+<div><b>Tomorrow</b><p id="tomorrow">--</p></div>
+<div><b>Next 48 hrs</b><p id="next48">--</p></div>
 </div>
 </div>
 
 <div class="card">
 <h3>🩺 Patient Suitability</h3>
 <p id="suitability">--</p>
-<p id="advice"></p>
+</div>
+
+<div class="card">
+<h3>🚑 Emergency Precautionary Measures</h3>
+<ul id="precautions"></ul>
 </div>
 
 </div>
 
 <script>
+const city=document.getElementById("city");
+const condition=document.getElementById("condition");
+const lungL=document.getElementById("lungL");
+const lungR=document.getElementById("lungR");
+
 function checkAQI(){
-    fetch("/getAQI",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-            city:city.value,
-            condition:condition.value
-        })
-    })
-    .then(res=>res.json())
-    .then(data=>{
-        today.innerText=data.today;
-        tomorrow.innerText=data.tomorrow;
-        next48.innerText=data.next48;
+fetch("/getAQI",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({city:city.value,condition:condition.value})
+})
+.then(res=>res.json())
+.then(data=>{
+today.innerText=data.today;
+tomorrow.innerText=data.tomorrow;
+next48.innerText=data.next48;
 
-        suitability.innerText="Suitability: "+data.suitability;
-        advice.innerText=data.advice;
+statusText.innerText="Status: "+data.status;
+suitability.innerText=data.suitability;
 
-        suitability.className =
-            data.suitability==="Suitable" ? "good" :
-            data.suitability==="Moderately Suitable" ? "moderate" : "poor";
-    });
+lungL.className="lung "+data.lung_state;
+lungR.className="lung right "+data.lung_state;
+
+precautions.innerHTML="";
+data.precautions.forEach(p=>{
+const li=document.createElement("li");
+li.innerText=p;
+precautions.appendChild(li);
+});
+});
 }
 </script>
 
