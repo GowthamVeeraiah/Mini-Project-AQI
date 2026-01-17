@@ -2,41 +2,42 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BreathSafe – Patient AQI Advisor</title>
+<title>BreathSafe – Smart Patient Safety System</title>
 
 <style>
 body{
-    font-family:Segoe UI, sans-serif;
-    background:#eef3ff;
     margin:0;
+    font-family:Segoe UI, sans-serif;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
 }
 header{
-    background:linear-gradient(90deg,#0f2027,#203a43,#2c5364);
-    color:white;
-    padding:20px;
     text-align:center;
+    padding:25px;
 }
 .container{
-    max-width:900px;
+    max-width:1100px;
     margin:auto;
-    padding:30px;
+    padding:20px;
 }
 .card{
-    background:white;
+    background:rgba(255,255,255,0.15);
+    backdrop-filter:blur(12px);
+    border-radius:18px;
     padding:25px;
-    border-radius:16px;
     margin-bottom:25px;
-    box-shadow:0 12px 30px rgba(0,0,0,0.12);
+    box-shadow:0 15px 35px rgba(0,0,0,0.3);
 }
 select,button{
     width:100%;
     padding:12px;
     margin-top:10px;
+    border-radius:8px;
+    border:none;
 }
 button{
-    background:#1f3c88;
+    background:#ff5252;
     color:white;
-    border:none;
     font-size:16px;
     cursor:pointer;
 }
@@ -45,13 +46,12 @@ button{
 .lungs{
     display:flex;
     justify-content:center;
-    gap:20px;
-    margin:20px 0;
+    gap:30px;
 }
 .lung{
-    width:100px;
-    height:150px;
-    border-radius:50px;
+    width:110px;
+    height:160px;
+    border-radius:60px;
     background:#f1c40f;
     animation:breath 3s infinite;
 }
@@ -59,44 +59,58 @@ button{
 
 @keyframes breath{
     0%{transform:scaleY(1)}
-    50%{transform:scaleY(1.15)}
+    50%{transform:scaleY(1.2)}
     100%{transform:scaleY(1)}
 }
 
 .good{background:#2ecc71!important}
 .moderate{background:#f1c40f!important}
-.poor{background:#e74c3c!important}
-
-.forecast{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:15px;
-    text-align:center;
+.poor{
+    background:#e74c3c!important;
+    animation:shake 0.5s infinite;
 }
+
+@keyframes shake{
+    0%{transform:translateX(0)}
+    25%{transform:translateX(-5px)}
+    50%{transform:translateX(5px)}
+    75%{transform:translateX(-5px)}
+    100%{transform:translateX(0)}
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+}
+
 ul{padding-left:20px}
+h3{margin-top:0}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>🫁 BreathSafe – AQI & Patient Safety System</h1>
-<p>Live AQI • Disease Suitability • Emergency Precautions</p>
+<h1>🫁 BreathSafe</h1>
+<p>AI-Inspired AQI • Patient Safety • Emergency Support</p>
 </header>
 
 <div class="container">
 
 <div class="card">
-<label>District</label>
 <select id="city">
-<option value="">-- Select District --</option>
-<option>Bengaluru Urban</option><option>Mysuru</option><option>Hassan</option>
-<option>Tumakuru</option><option>Mangaluru</option><option>Udupi</option>
-<option>Belagavi</option><option>Ballari</option><option>Bidar</option>
-<option>Kalaburagi</option><option>Shivamogga</option><option>Mandya</option>
+<option value="">-- Select Karnataka District --</option>
+<script>
+["Bagalkote","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar",
+"Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga","Dakshina Kannada",
+"Davanagere","Dharwad","Gadag","Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal",
+"Mandya","Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi",
+"Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"]
+.forEach(d=>document.write(`<option>${d}</option>`));
+</script>
 </select>
 
-<label>Disease</label>
 <select id="condition">
 <option>Asthma</option>
 <option>COPD</option>
@@ -104,11 +118,11 @@ ul{padding-left:20px}
 <option>Allergic Rhinitis</option>
 </select>
 
-<button onclick="checkAQI()">Analyze AQI</button>
+<button onclick="analyze()">🚨 Analyze Patient Safety</button>
 </div>
 
 <div class="card">
-<h3>🫁 Lung Condition (Live)</h3>
+<h3>🫁 Live Lung Condition</h3>
 <div class="lungs">
 <div class="lung" id="lungL"></div>
 <div class="lung right" id="lungR"></div>
@@ -116,56 +130,61 @@ ul{padding-left:20px}
 <p id="statusText">Status: --</p>
 </div>
 
+<div class="grid">
 <div class="card">
 <h3>📊 AQI Forecast</h3>
-<div class="forecast">
-<div><b>Today</b><p id="today">--</p></div>
-<div><b>Tomorrow</b><p id="tomorrow">--</p></div>
-<div><b>Next 48 hrs</b><p id="next48">--</p></div>
-</div>
+<p>Today: <span id="today">--</span></p>
+<p>Tomorrow: <span id="tomorrow">--</span></p>
+<p>Next 48 hrs: <span id="next48">--</span></p>
 </div>
 
 <div class="card">
-<h3>🩺 Patient Suitability</h3>
+<h3>🩺 Suitability</h3>
 <p id="suitability">--</p>
 </div>
 
 <div class="card">
-<h3>🚑 Emergency Precautionary Measures</h3>
+<h3>🚑 Emergency Precautions</h3>
 <ul id="precautions"></ul>
+</div>
+
+<div class="card">
+<h3>🏥 Nearby Hospitals</h3>
+<ul id="hospitals"></ul>
+</div>
 </div>
 
 </div>
 
 <script>
-const city=document.getElementById("city");
-const condition=document.getElementById("condition");
-const lungL=document.getElementById("lungL");
-const lungR=document.getElementById("lungR");
-
-function checkAQI(){
+function analyze(){
 fetch("/getAQI",{
 method:"POST",
 headers:{"Content-Type":"application/json"},
-body:JSON.stringify({city:city.value,condition:condition.value})
+body:JSON.stringify({
+city:city.value,
+condition:condition.value
+})
 })
 .then(res=>res.json())
 .then(data=>{
 today.innerText=data.today;
 tomorrow.innerText=data.tomorrow;
 next48.innerText=data.next48;
-
 statusText.innerText="Status: "+data.status;
 suitability.innerText=data.suitability;
 
-lungL.className="lung "+data.lung_state;
-lungR.className="lung right "+data.lung_state;
+lungL.className="lung "+data.level;
+lungR.className="lung right "+data.level;
 
 precautions.innerHTML="";
 data.precautions.forEach(p=>{
-const li=document.createElement("li");
-li.innerText=p;
-precautions.appendChild(li);
+precautions.innerHTML+=`<li>${p}</li>`;
+});
+
+hospitals.innerHTML="";
+data.hospitals.forEach(h=>{
+hospitals.innerHTML+=`<li>${h}</li>`;
 });
 });
 }
