@@ -3,6 +3,16 @@ import random
 
 app = Flask(__name__)
 
+# Karnataka districts (for validation / realism)
+KARNATAKA_DISTRICTS = [
+    "Bagalkote","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban",
+    "Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru",
+    "Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag",
+    "Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya",
+    "Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi",
+    "Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"
+]
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -13,20 +23,29 @@ def get_aqi():
     city = data.get("city")
     condition = data.get("condition")
 
-    # Simulated AQI (works without API key)
-    aqi = random.randint(40, 160)
+    # Safety check
+    if city not in KARNATAKA_DISTRICTS:
+        return jsonify({
+            "aqi": 0,
+            "advice": "Invalid district selected."
+        })
 
+    # Simulated AQI values (realistic range)
+    aqi = random.randint(40, 180)
+
+    # Health-based advice
     if aqi <= 50:
-        advice = "Good air quality. Safe for patients."
+        advice = f"Air quality in {city} is good. Safe for {condition} patients."
     elif aqi <= 100:
-        advice = "Moderate air quality. Avoid heavy outdoor activity."
+        advice = f"Air quality in {city} is moderate. {condition} patients should limit outdoor activity."
     else:
-        advice = "Poor air quality. Stay indoors."
+        advice = f"Air quality in {city} is poor. {condition} patients should stay indoors."
 
     return jsonify({
         "aqi": aqi,
         "advice": advice
     })
 
+# Local run (Render will ignore this and use gunicorn)
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
