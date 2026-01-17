@@ -2,70 +2,57 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BreathSafe – Karnataka AQI Monitor</title>
+<title>BreathSafe – AQI Forecast System</title>
 
 <style>
 body{
-    font-family: "Segoe UI", sans-serif;
-    background: linear-gradient(120deg,#f0f4ff,#e6f7ff);
+    font-family:Segoe UI, sans-serif;
+    background:#eef2f7;
     margin:0;
 }
 header{
     background:#203a43;
     color:white;
-    padding:18px;
+    padding:20px;
     text-align:center;
 }
 .container{
-    padding:30px;
-    max-width:600px;
+    max-width:700px;
     margin:auto;
+    padding:30px;
 }
 .card{
     background:white;
     padding:25px;
     border-radius:15px;
-    box-shadow:0 15px 30px rgba(0,0,0,0.15);
-    transition:0.5s;
+    margin-bottom:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.1);
 }
-select, button{
+select,button{
     width:100%;
     padding:12px;
     margin-top:10px;
-    border-radius:8px;
-    border:1px solid #ccc;
 }
 button{
     background:#1f3c88;
     color:white;
-    font-size:16px;
+    border:none;
     cursor:pointer;
 }
-button:hover{opacity:0.9}
-
-.status{
-    font-size:20px;
-    font-weight:bold;
-    margin-top:15px;
-}
-
 .good{color:#2ecc71}
 .moderate{color:#f1c40f}
 .poor{color:#e74c3c}
-
-.loader{
-    display:none;
-    text-align:center;
+.forecast{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
     margin-top:15px;
 }
-
-.bar{
-    height:18px;
-    width:0%;
-    background:#2ecc71;
+.forecast div{
+    background:#f8f9ff;
+    padding:15px;
     border-radius:10px;
-    margin-top:10px;
-    transition:1s;
+    text-align:center;
 }
 </style>
 </head>
@@ -73,47 +60,28 @@ button:hover{opacity:0.9}
 <body>
 
 <header>
-    <h1>🫁 BreathSafe – Karnataka AQI Advisor</h1>
-    <p>Live Air Suitability for Respiratory Patients</p>
+<h1>🫁 BreathSafe – AQI Forecast & Suitability</h1>
+<p>Today • Tomorrow • Next 48 Hours</p>
 </header>
 
 <div class="container">
-<div class="card" id="card">
 
-<label>Select District</label>
+<div class="card">
+<label>District</label>
 <select id="city">
 <option value="">-- Select District --</option>
-<option>Bagalkote</option>
-<option>Ballari</option>
-<option>Belagavi</option>
-<option>Bengaluru Rural</option>
-<option>Bengaluru Urban</option>
-<option>Bidar</option>
-<option>Chamarajanagar</option>
-<option>Chikkaballapura</option>
-<option>Chikkamagaluru</option>
-<option>Chitradurga</option>
-<option>Dakshina Kannada</option>
-<option>Davanagere</option>
-<option>Dharwad</option>
-<option>Gadag</option>
-<option>Hassan</option>
-<option>Haveri</option>
-<option>Kalaburagi</option>
-<option>Kodagu</option>
-<option>Kolar</option>
-<option>Koppal</option>
-<option>Mandya</option>
-<option>Mysuru</option>
-<option>Raichur</option>
-<option>Ramanagara</option>
-<option>Shivamogga</option>
-<option>Tumakuru</option>
-<option>Udupi</option>
-<option>Uttara Kannada</option>
-<option>Vijayanagara</option>
-<option>Vijayapura</option>
-<option>Yadgir</option>
+<option>Bagalkote</option><option>Ballari</option><option>Belagavi</option>
+<option>Bengaluru Rural</option><option>Bengaluru Urban</option>
+<option>Bidar</option><option>Chamarajanagar</option>
+<option>Chikkaballapura</option><option>Chikkamagaluru</option>
+<option>Chitradurga</option><option>Dakshina Kannada</option>
+<option>Davanagere</option><option>Dharwad</option><option>Gadag</option>
+<option>Hassan</option><option>Haveri</option><option>Kalaburagi</option>
+<option>Kodagu</option><option>Kolar</option><option>Koppal</option>
+<option>Mandya</option><option>Mysuru</option><option>Raichur</option>
+<option>Ramanagara</option><option>Shivamogga</option><option>Tumakuru</option>
+<option>Udupi</option><option>Uttara Kannada</option>
+<option>Vijayanagara</option><option>Vijayapura</option><option>Yadgir</option>
 </select>
 
 <label>Health Condition</label>
@@ -123,72 +91,59 @@ button:hover{opacity:0.9}
 <option>Allergy</option>
 </select>
 
-<button onclick="checkAQI()">Check Air Quality</button>
-
-<div class="loader" id="loader">⏳ Checking air quality...</div>
-
-<p id="aqiText">AQI: --</p>
-<div class="bar" id="bar"></div>
-<p class="status" id="status">Status: --</p>
-<p id="advice"></p>
-
+<button onclick="checkAQI()">Analyze Air Quality</button>
 </div>
+
+<div class="card">
+<h3>📈 AQI Forecast</h3>
+<div class="forecast">
+<div>
+<h4>Today</h4>
+<p id="today">--</p>
+</div>
+<div>
+<h4>Tomorrow</h4>
+<p id="tomorrow">--</p>
+</div>
+<div>
+<h4>Next 48 hrs</h4>
+<p id="next48">--</p>
+</div>
+</div>
+</div>
+
+<div class="card">
+<h3>🩺 Patient Suitability</h3>
+<p id="suitability">--</p>
+<p id="advice"></p>
+</div>
+
 </div>
 
 <script>
 function checkAQI(){
-    const city = cityEl.value;
-    if(city===""){ alert("Select a district"); return; }
-
-    loader.style.display="block";
-    bar.style.width="0%";
-
     fetch("/getAQI",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
-            city: city,
-            condition: condition.value
+            city:city.value,
+            condition:condition.value
         })
     })
     .then(res=>res.json())
     .then(data=>{
-        loader.style.display="none";
-        aqiText.innerText="AQI: "+data.aqi;
+        today.innerText=data.today;
+        tomorrow.innerText=data.tomorrow;
+        next48.innerText=data.next48;
+
+        suitability.innerText="Suitability: "+data.suitability;
         advice.innerText=data.advice;
 
-        let percent = Math.min(data.aqi,200)/2;
-        bar.style.width=percent+"%";
-
-        if(data.aqi<=50){
-            status.innerText="Status: Safe";
-            status.className="status good";
-            bar.style.background="#2ecc71";
-            card.style.border="3px solid #2ecc71";
-        }
-        else if(data.aqi<=100){
-            status.innerText="Status: Moderate";
-            status.className="status moderate";
-            bar.style.background="#f1c40f";
-            card.style.border="3px solid #f1c40f";
-        }
-        else{
-            status.innerText="Status: Unsafe";
-            status.className="status poor";
-            bar.style.background="#e74c3c";
-            card.style.border="3px solid #e74c3c";
-        }
+        suitability.className =
+            data.suitability==="Suitable" ? "good" :
+            data.suitability==="Moderately Suitable" ? "moderate" : "poor";
     });
 }
-
-const cityEl=document.getElementById("city");
-const condition=document.getElementById("condition");
-const loader=document.getElementById("loader");
-const aqiText=document.getElementById("aqiText");
-const advice=document.getElementById("advice");
-const status=document.getElementById("status");
-const bar=document.getElementById("bar");
-const card=document.getElementById("card");
 </script>
 
 </body>
