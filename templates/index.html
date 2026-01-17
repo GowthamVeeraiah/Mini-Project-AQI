@@ -2,20 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BreathSafe – AQI Safety System</title>
+<title>BreathSafe – AQI Patient Safety System</title>
 
 <style>
-/* ===== GLOBAL ===== */
+/* ================= GLOBAL ================= */
+*{box-sizing:border-box}
 body{
     margin:0;
     font-family:"Segoe UI",sans-serif;
     background:#0f2027;
     color:white;
-    overflow-x:hidden;
     position:relative;
+    overflow-x:hidden;
 }
 
-/* ===== BIG WATERMARK ===== */
+/* ===== WATERMARK / IPR ===== */
 body::before{
     content:"CREATED BY GOWTHAM";
     position:fixed;
@@ -31,15 +32,15 @@ body::before{
     letter-spacing:10px;
 }
 
-/* ===== HEADER ===== */
+/* ================= HEADER ================= */
 header{
     text-align:center;
     padding:25px;
 }
 header h1{margin:0}
-header p{opacity:.9}
+header p{opacity:.85}
 
-/* ===== LAYOUT ===== */
+/* ================= LAYOUT ================= */
 .container{
     max-width:1200px;
     margin:auto;
@@ -47,7 +48,7 @@ header p{opacity:.9}
 }
 .card{
     background:rgba(255,255,255,0.15);
-    backdrop-filter:blur(12px);
+    backdrop-filter:blur(14px);
     border-radius:18px;
     padding:25px;
     margin-bottom:25px;
@@ -72,8 +73,9 @@ button{
     font-size:16px;
     cursor:pointer;
 }
+button:hover{opacity:.9}
 
-/* ===== LUNGS ===== */
+/* ================= LUNGS ================= */
 .lungs{
     display:flex;
     justify-content:center;
@@ -101,33 +103,20 @@ button{
 }
 @keyframes shake{
     0%{transform:translateX(0)}
-    50%{transform:translateX(5px)}
+    50%{transform:translateX(6px)}
     100%{transform:translateX(0)}
 }
 
+/* ================= LISTS ================= */
 ul{padding-left:18px}
 li{margin-bottom:10px}
 small{opacity:.85}
 
-/* ===== SIGNATURE ===== */
-.signature{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    font-size:14px;
-    opacity:0.85;
-    animation:fade 4s infinite alternate;
-}
-@keyframes fade{
-    from{opacity:0.4}
-    to{opacity:0.9}
-}
-
-/* ===== FOOTER ===== */
+/* ================= FOOTER ================= */
 footer{
     text-align:center;
     padding:15px;
-    opacity:0.6;
+    opacity:.6;
     font-size:13px;
 }
 </style>
@@ -137,22 +126,25 @@ footer{
 
 <header>
 <h1>🫁 BreathSafe</h1>
-<p>AQI Forecast • Patient Safety • Emergency Support</p>
+<p>AQI Forecast • Patient Safety • DBMS Powered</p>
 </header>
 
 <div class="container">
 
+<!-- INPUT -->
 <div class="card">
+<h3>📍 Select District & Disease</h3>
+
 <select id="city">
 <option value="">-- Select Karnataka District --</option>
 <script>
 [
-"Bagalkote","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban","Bidar",
-"Chamarajanagar","Chikkaballapura","Chikkamagaluru","Chitradurga",
-"Dakshina Kannada","Davanagere","Dharwad","Gadag","Hassan","Haveri",
-"Kalaburagi","Kodagu","Kolar","Koppal","Mandya","Mysuru","Raichur",
-"Ramanagara","Shivamogga","Tumakuru","Udupi","Uttara Kannada",
-"Vijayanagara","Vijayapura","Yadgir"
+"Bagalkote","Ballari","Belagavi","Bengaluru Urban","Bengaluru Rural",
+"Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru",
+"Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag",
+"Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya",
+"Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi",
+"Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"
 ].forEach(d=>document.write(`<option>${d}</option>`));
 </script>
 </select>
@@ -167,8 +159,9 @@ footer{
 <button onclick="analyze()">🚨 Analyze AQI</button>
 </div>
 
+<!-- LUNG STATUS -->
 <div class="card">
-<h3>🫁 Live Lung Status</h3>
+<h3>🫁 Live Lung Condition</h3>
 <div class="lungs">
 <div class="lung" id="lungL"></div>
 <div class="lung right" id="lungR"></div>
@@ -176,6 +169,7 @@ footer{
 <p id="statusText">Status: --</p>
 </div>
 
+<!-- DATA GRID -->
 <div class="grid">
 
 <div class="card">
@@ -186,17 +180,17 @@ footer{
 </div>
 
 <div class="card">
-<h3>🩺 Suitability</h3>
+<h3>🩺 AQI Suitability</h3>
 <p id="suitability">--</p>
 </div>
 
 <div class="card">
-<h3>🚑 Precautions</h3>
+<h3>🚑 Precautionary Measures</h3>
 <ul id="precautions"></ul>
 </div>
 
 <div class="card">
-<h3>🏥 Nearby Hospitals</h3>
+<h3>🏥 Nearby Hospitals (From DB)</h3>
 <ul id="hospitals"></ul>
 </div>
 
@@ -204,46 +198,55 @@ footer{
 </div>
 
 <footer>
-© 2026 BreathSafe | Created & Designed by <b>Gowtham</b>
+© 2026 BreathSafe | Created by <b>Gowtham</b>  
+(23CS604 – Mini Project)
 </footer>
-
-<div class="signature">✍️ Built by Gowtham</div>
 
 <script>
 function analyze(){
-fetch("/getAQI",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-city:city.value,
-condition:condition.value
-})
-})
-.then(res=>res.json())
-.then(data=>{
-today.innerText=data.today;
-tomorrow.innerText=data.tomorrow;
-next48.innerText=data.next48;
-statusText.innerText="Status: "+data.status;
-suitability.innerText=data.suitability;
+    if(city.value===""){
+        alert("Please select a district");
+        return;
+    }
 
-lungL.className="lung "+data.level;
-lungR.className="lung right "+data.level;
+    fetch("/getAQI",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            city: city.value,
+            condition: condition.value
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        today.innerText = data.today;
+        tomorrow.innerText = data.tomorrow;
+        next48.innerText = data.next48;
 
-precautions.innerHTML="";
-data.precautions.forEach(p=>{
-precautions.innerHTML+=`<li>${p}</li>`;
-});
+        statusText.innerText = "Status: " + data.status;
+        suitability.innerText = data.suitability;
 
-hospitals.innerHTML="";
-data.hospitals.forEach(h=>{
-hospitals.innerHTML+=`
-<li>
-<b>${h.name}</b><br>
-<small>${h.address}</small>
-</li>`;
-});
-});
+        lungL.className = "lung " + data.level;
+        lungR.className = "lung right " + data.level;
+
+        precautions.innerHTML="";
+        data.precautions.forEach(p=>{
+            precautions.innerHTML += `<li>${p}</li>`;
+        });
+
+        hospitals.innerHTML="";
+        data.hospitals.forEach(h=>{
+            hospitals.innerHTML += `
+                <li>
+                    <b>${h.hospital_name}</b><br>
+                    <small>${h.address}</small>
+                </li>
+            `;
+        });
+    })
+    .catch(()=>{
+        alert("Error fetching data");
+    });
 }
 </script>
 
