@@ -20,33 +20,70 @@ def home():
 def get_aqi():
     data = request.get_json()
     city = data.get("city")
-    condition = data.get("condition")
+    disease = data.get("condition")
 
     if city not in KARNATAKA_DISTRICTS:
         return jsonify({"error": "Invalid district"})
 
-    # Simulated AQI values
-    today_aqi = random.randint(40, 180)
-    tomorrow_aqi = max(20, today_aqi + random.randint(-15, 15))
-    next_48_aqi = max(20, tomorrow_aqi + random.randint(-20, 20))
+    # AQI Forecast Simulation
+    today = random.randint(40, 180)
+    tomorrow = max(20, today + random.randint(-15, 15))
+    next48 = max(20, tomorrow + random.randint(-20, 20))
 
     # Suitability logic
-    if today_aqi <= 50:
-        suitability = "Suitable"
-        advice = f"Air quality is good. Safe for {condition} patients."
-    elif today_aqi <= 100:
-        suitability = "Moderately Suitable"
-        advice = f"Moderate air quality. {condition} patients should avoid prolonged outdoor activity."
+    if today <= 50:
+        status = "Safe"
+        lung_state = "good"
+    elif today <= 100:
+        status = "Caution"
+        lung_state = "moderate"
     else:
-        suitability = "Not Suitable"
-        advice = f"Poor air quality. {condition} patients are advised to stay indoors."
+        status = "Unsafe"
+        lung_state = "poor"
+
+    # Disease-based precautions
+    precautions = {
+        "Asthma": [
+            "Carry inhaler at all times",
+            "Avoid heavy traffic areas",
+            "Use N95 mask",
+            "Avoid physical exertion"
+        ],
+        "COPD": [
+            "Avoid outdoor exposure",
+            "Use oxygen support if prescribed",
+            "Wear double-layer mask",
+            "Seek medical help if breathless"
+        ],
+        "Bronchitis": [
+            "Cover mouth and nose",
+            "Avoid cold air",
+            "Use prescribed medication",
+            "Limit outdoor duration"
+        ],
+        "Allergic Rhinitis": [
+            "Wear mask",
+            "Avoid dusty areas",
+            "Use antihistamines if needed",
+            "Wash face after returning indoors"
+        ]
+    }
+
+    # AQI suitability per disease
+    suitability_msg = (
+        f"AQI level is {status.lower()} for {disease} patients."
+        if status != "Unsafe"
+        else f"AQI is not suitable for {disease} patients."
+    )
 
     return jsonify({
-        "today": today_aqi,
-        "tomorrow": tomorrow_aqi,
-        "next48": next_48_aqi,
-        "suitability": suitability,
-        "advice": advice
+        "today": today,
+        "tomorrow": tomorrow,
+        "next48": next48,
+        "status": status,
+        "lung_state": lung_state,
+        "suitability": suitability_msg,
+        "precautions": precautions[disease]
     })
 
 if __name__ == "__main__":
