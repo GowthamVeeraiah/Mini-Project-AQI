@@ -2,36 +2,44 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BreathSafe – GV AQI System</title>
+<title>BreathSafe – AQI Safety System</title>
 
 <style>
-/* ===== GV BACKGROUND ===== */
+/* ===== GLOBAL ===== */
 body{
     margin:0;
     font-family:"Segoe UI",sans-serif;
     background:#0f2027;
     color:white;
-    position:relative;
     overflow-x:hidden;
+    position:relative;
 }
+
+/* ===== BIG WATERMARK ===== */
 body::before{
-    content:"GV";
+    content:"CREATED BY GOWTHAM";
     position:fixed;
     top:50%;
     left:50%;
-    transform:translate(-50%,-50%);
-    font-size:28vw;
+    transform:translate(-50%,-50%) rotate(-20deg);
+    font-size:14vw;
     font-weight:900;
-    color:rgba(255,255,255,0.05);
+    color:rgba(255,255,255,0.035);
+    white-space:nowrap;
+    pointer-events:none;
     z-index:-1;
-    letter-spacing:20px;
+    letter-spacing:10px;
 }
 
-/* ===== LAYOUT ===== */
+/* ===== HEADER ===== */
 header{
     text-align:center;
     padding:25px;
 }
+header h1{margin:0}
+header p{opacity:.9}
+
+/* ===== LAYOUT ===== */
 .container{
     max-width:1200px;
     margin:auto;
@@ -100,6 +108,28 @@ button{
 ul{padding-left:18px}
 li{margin-bottom:10px}
 small{opacity:.85}
+
+/* ===== SIGNATURE ===== */
+.signature{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    font-size:14px;
+    opacity:0.85;
+    animation:fade 4s infinite alternate;
+}
+@keyframes fade{
+    from{opacity:0.4}
+    to{opacity:0.9}
+}
+
+/* ===== FOOTER ===== */
+footer{
+    text-align:center;
+    padding:15px;
+    opacity:0.6;
+    font-size:13px;
+}
 </style>
 </head>
 
@@ -107,7 +137,7 @@ small{opacity:.85}
 
 <header>
 <h1>🫁 BreathSafe</h1>
-<p>GV AQI • Patient Safety • Emergency Support</p>
+<p>AQI Forecast • Patient Safety • Emergency Support</p>
 </header>
 
 <div class="container">
@@ -172,6 +202,12 @@ small{opacity:.85}
 
 </div>
 </div>
+
+<footer>
+© 2026 BreathSafe | Created & Designed by <b>Gowtham</b>
+</footer>
+
+<div class="signature">✍️ Built by Gowtham</div>
 
 <script>
 function analyze(){
