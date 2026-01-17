@@ -25,7 +25,6 @@ def get_aqi():
     if district not in DISTRICTS:
         return jsonify({"error": "Invalid district"})
 
-    # AQI simulation
     today = random.randint(40, 200)
     tomorrow = max(30, today + random.randint(-20, 20))
     next48 = max(30, tomorrow + random.randint(-25, 25))
@@ -38,26 +37,19 @@ def get_aqi():
         status, level = "Danger", "poor"
 
     precautions = {
-        "Asthma": ["Carry inhaler", "Wear N95 mask", "Avoid physical exertion"],
+        "Asthma": ["Carry inhaler", "Wear N95 mask", "Avoid exertion"],
         "COPD": ["Avoid outdoor exposure", "Carry oxygen support", "Seek medical help"],
         "Bronchitis": ["Cover mouth", "Avoid cold air", "Limit outdoor time"],
         "Allergic Rhinitis": ["Avoid dust", "Use mask", "Wash face after return"]
     }
 
-    # ✅ Guaranteed hospital list (works for ALL districts)
     hospitals = [
-        {
-            "name": f"District Government Hospital {district}",
-            "address": f"Main Road, {district}, Karnataka"
-        },
-        {
-            "name": f"Medical College Hospital {district}",
-            "address": f"Near Bus Stand, {district}, Karnataka"
-        },
-        {
-            "name": f"Taluk Hospital {district}",
-            "address": f"Taluk Office Road, {district}, Karnataka"
-        }
+        {"name": f"District Government Hospital {district}",
+         "address": f"Main Road, {district}, Karnataka"},
+        {"name": f"Medical College Hospital {district}",
+         "address": f"Near Bus Stand, {district}, Karnataka"},
+        {"name": f"Taluk Hospital {district}",
+         "address": f"Taluk Office Road, {district}, Karnataka"}
     ]
 
     return jsonify({
