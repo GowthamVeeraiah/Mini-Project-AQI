@@ -3,7 +3,8 @@ import random
 
 app = Flask(__name__)
 
-KARNATAKA_DISTRICTS = [
+# All Karnataka districts
+DISTRICTS = [
     "Bagalkote","Ballari","Belagavi","Bengaluru Rural","Bengaluru Urban",
     "Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru",
     "Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag",
@@ -11,6 +12,15 @@ KARNATAKA_DISTRICTS = [
     "Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi",
     "Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"
 ]
+
+# Mock hospital database (exam-safe, realistic)
+HOSPITALS = {
+    "Bengaluru Urban": ["Victoria Hospital", "NIMHANS", "Bowring Hospital"],
+    "Mysuru": ["KR Hospital", "Apollo BGS", "JSS Hospital"],
+    "Hassan": ["HIMS Hassan", "District Hospital Hassan"],
+    "Tumakuru": ["District Hospital Tumakuru", "Siddaganga Hospital"],
+    "Ballari": ["VIMS Ballari", "District Hospital Ballari"],
+}
 
 @app.route("/")
 def home():
@@ -22,68 +32,45 @@ def get_aqi():
     city = data.get("city")
     disease = data.get("condition")
 
-    if city not in KARNATAKA_DISTRICTS:
+    if city not in DISTRICTS:
         return jsonify({"error": "Invalid district"})
 
-    # AQI Forecast Simulation
-    today = random.randint(40, 180)
-    tomorrow = max(20, today + random.randint(-15, 15))
-    next48 = max(20, tomorrow + random.randint(-20, 20))
+    # AQI Simulation
+    today = random.randint(40, 200)
+    tomorrow = max(30, today + random.randint(-20, 20))
+    next48 = max(30, tomorrow + random.randint(-25, 25))
 
-    # Suitability logic
     if today <= 50:
         status = "Safe"
-        lung_state = "good"
+        level = "good"
     elif today <= 100:
         status = "Caution"
-        lung_state = "moderate"
+        level = "moderate"
     else:
-        status = "Unsafe"
-        lung_state = "poor"
+        status = "Danger"
+        level = "poor"
 
-    # Disease-based precautions
     precautions = {
-        "Asthma": [
-            "Carry inhaler at all times",
-            "Avoid heavy traffic areas",
-            "Use N95 mask",
-            "Avoid physical exertion"
-        ],
-        "COPD": [
-            "Avoid outdoor exposure",
-            "Use oxygen support if prescribed",
-            "Wear double-layer mask",
-            "Seek medical help if breathless"
-        ],
-        "Bronchitis": [
-            "Cover mouth and nose",
-            "Avoid cold air",
-            "Use prescribed medication",
-            "Limit outdoor duration"
-        ],
-        "Allergic Rhinitis": [
-            "Wear mask",
-            "Avoid dusty areas",
-            "Use antihistamines if needed",
-            "Wash face after returning indoors"
-        ]
+        "Asthma": ["Carry inhaler", "Wear N95 mask", "Avoid exertion"],
+        "COPD": ["Avoid outdoors", "Carry oxygen support", "Seek medical help"],
+        "Bronchitis": ["Cover mouth", "Avoid cold air", "Limit exposure"],
+        "Allergic Rhinitis": ["Avoid dust", "Use mask", "Wash face after return"]
     }
 
-    # AQI suitability per disease
-    suitability_msg = (
-        f"AQI level is {status.lower()} for {disease} patients."
-        if status != "Unsafe"
-        else f"AQI is not suitable for {disease} patients."
-    )
+    hospitals = HOSPITALS.get(city, [
+        f"District Hospital {city}",
+        f"Government Medical College {city}"
+    ])
 
     return jsonify({
         "today": today,
         "tomorrow": tomorrow,
         "next48": next48,
         "status": status,
-        "lung_state": lung_state,
-        "suitability": suitability_msg,
-        "precautions": precautions[disease]
+        "level": level,
+        "suitability": f"AQI is {status.lower()} for {disease} patients.",
+        "precautions": precautions[disease],
+        "hospitals": hospitals
     })
 
 if __name__ == "__main__":
