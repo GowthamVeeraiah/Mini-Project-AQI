@@ -7,7 +7,7 @@ from datetime import datetime
 app = Flask(__name__)
 DB_NAME = "breathsafe.db"
 
-# ---------------- DB CONNECTION ----------------
+# ---------------- DATABASE CONNECTION ----------------
 def get_db():
     conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
@@ -38,7 +38,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ---------------- INSERT DATA ----------------
+# ---------------- SEED INITIAL DATA ----------------
 def seed_data():
     conn = get_db()
     cur = conn.cursor()
@@ -82,7 +82,7 @@ def seed_data():
     conn.commit()
     conn.close()
 
-# Initialize DB once
+# ---------------- INITIALIZE DATABASE ----------------
 if not os.path.exists(DB_NAME):
     init_db()
     seed_data()
@@ -94,6 +94,7 @@ def home():
 
 @app.route("/getAQI", methods=["POST"])
 def get_aqi():
+
     data = request.get_json()
     district = data.get("city")
     disease = data.get("condition")
@@ -101,6 +102,7 @@ def get_aqi():
     conn = get_db()
     cur = conn.cursor()
 
+    # Get district ID
     cur.execute("SELECT district_id FROM districts WHERE district_name=?", (district,))
     row = cur.fetchone()
 
@@ -109,18 +111,18 @@ def get_aqi():
 
     district_id = row["district_id"]
 
+    # Get hospitals
     cur.execute("""
-    SELECT hospital_name, address
-    FROM hospitals
-    WHERE district_id=?
+        SELECT hospital_name, address
+        FROM hospitals
+        WHERE district_id=?
     """, (district_id,))
     hospitals = [dict(r) for r in cur.fetchall()]
+
     conn.close()
 
-    # AQI Simulation
+    # ---------------- SIMULATED AQI ----------------
     today = random.randint(40, 200)
-    tomorrow = max(30, today + random.randint(-20, 20))
-    next48 = max(30, tomorrow + random.randint(-25, 25))
 
     if today <= 50:
         status, level = "Good", "good"
@@ -129,37 +131,49 @@ def get_aqi():
     else:
         status, level = "Unhealthy", "poor"
 
-    # Pollutants
+    # ---------------- POLLUTANTS ----------------
     pm25 = round(random.uniform(10, 150), 1)
     pm10 = round(random.uniform(20, 180), 1)
     co = round(random.uniform(1, 10), 1)
     no2 = round(random.uniform(10, 120), 1)
 
-    # Weather
+    # ---------------- WEATHER ----------------
     temp = random.randint(20, 35)
     humidity = random.randint(40, 85)
     wind = random.randint(5, 25)
     condition_weather = random.choice(["Clear", "Cloudy", "Hazy", "Windy"])
 
-    # 24-Hour Trend Data
+    # ---------------- TREND DATA ----------------
     trend = [random.randint(40, 200) for _ in range(8)]
 
     precautions = {
-        "Asthma": ["Carry inhaler", "Wear N95 mask", "Avoid exertion"],
-        "COPD": ["Avoid outdoor exposure", "Carry oxygen support", "Seek medical help"],
-        "Bronchitis": ["Cover mouth", "Avoid cold air", "Limit outdoor time"],
-        "Allergic Rhinitis": ["Avoid dust", "Use mask", "Wash face after return"]
+        "Asthma": [
+            "Carry inhaler at all times",
+            "Avoid outdoor exercise",
+            "Wear N95 mask"
+        ],
+        "COPD": [
+            "Limit outdoor exposure",
+            "Use oxygen support if prescribed",
+            "Seek medical help if breathing worsens"
+        ],
+        "Bronchitis": [
+            "Avoid cold air exposure",
+            "Cover mouth while outside",
+            "Stay hydrated"
+        ],
+        "Allergic Rhinitis": [
+            "Avoid dusty areas",
+            "Use protective mask",
+            "Wash face after returning home"
+        ]
     }
 
     return jsonify({
         "today": today,
-        "tomorrow": tomorrow,
-        "next48": next48,
         "status": status,
         "level": level,
         "suitability": f"AQI is {status.lower()} for {disease} patients.",
-        "precautions": precautions[disease],
-        "hospitals": hospitals,
         "pm25": pm25,
         "pm10": pm10,
         "co": co,
@@ -169,8 +183,11 @@ def get_aqi():
         "wind": wind,
         "conditionWeather": condition_weather,
         "trend": trend,
+        "hospitals": hospitals,
+        "precautions": precautions.get(disease, []),
         "updated": datetime.now().strftime("%I:%M:%S %p")
     })
 
+# ---------------- RUN APP ----------------
 if __name__ == "__main__":
     app.run(debug=True)
