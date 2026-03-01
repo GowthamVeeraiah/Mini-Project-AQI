@@ -82,7 +82,7 @@ def seed_data():
     conn.commit()
     conn.close()
 
-# Initialize DB
+# Initialize DB once
 if not os.path.exists(DB_NAME):
     init_db()
     seed_data()
@@ -115,7 +115,6 @@ def get_aqi():
     WHERE district_id=?
     """, (district_id,))
     hospitals = [dict(r) for r in cur.fetchall()]
-
     conn.close()
 
     # AQI Simulation
@@ -130,15 +129,20 @@ def get_aqi():
     else:
         status, level = "Unhealthy", "poor"
 
+    # Pollutants
     pm25 = round(random.uniform(10, 150), 1)
     pm10 = round(random.uniform(20, 180), 1)
     co = round(random.uniform(1, 10), 1)
     no2 = round(random.uniform(10, 120), 1)
 
+    # Weather
     temp = random.randint(20, 35)
     humidity = random.randint(40, 85)
     wind = random.randint(5, 25)
     condition_weather = random.choice(["Clear", "Cloudy", "Hazy", "Windy"])
+
+    # 24-Hour Trend Data
+    trend = [random.randint(40, 200) for _ in range(8)]
 
     precautions = {
         "Asthma": ["Carry inhaler", "Wear N95 mask", "Avoid exertion"],
@@ -164,6 +168,7 @@ def get_aqi():
         "humidity": humidity,
         "wind": wind,
         "conditionWeather": condition_weather,
+        "trend": trend,
         "updated": datetime.now().strftime("%I:%M:%S %p")
     })
 
