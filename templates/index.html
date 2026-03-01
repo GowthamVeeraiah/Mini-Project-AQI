@@ -69,6 +69,11 @@ select{padding:6px}
 </div>
 
 <div class="card">
+<h3>24-Hour AQI Trend</h3>
+<canvas id="aqiChart"></canvas>
+</div>
+
+<div class="card">
 <h3>Hospitals</h3>
 <ul id="hospitals"></ul>
 </div>
@@ -95,6 +100,28 @@ let opt=document.createElement("option");
 opt.text=d;
 city.add(opt);
 });
+
+let chart;
+
+function createChart(dataPoints){
+const ctx=document.getElementById("aqiChart").getContext("2d");
+if(chart){chart.destroy();}
+chart=new Chart(ctx,{
+type:"line",
+data:{
+labels:["1AM","4AM","7AM","10AM","1PM","4PM","7PM","10PM"],
+datasets:[{
+label:"AQI",
+data:dataPoints,
+borderColor:"#6366f1",
+backgroundColor:"rgba(99,102,241,0.1)",
+fill:true,
+tension:0.4
+}]
+},
+options:{responsive:true}
+});
+}
 
 function analyze(){
 fetch("/getAQI",{
@@ -130,6 +157,8 @@ precautions.innerHTML="";
 data.precautions.forEach(p=>{
 precautions.innerHTML+=`<li>${p}</li>`;
 });
+
+createChart(data.trend);
 });
 }
 </script>
