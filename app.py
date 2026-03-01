@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import sqlite3
 import random
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 DB_NAME = "breathsafe.db"
@@ -37,7 +38,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ---------------- INSERT INITIAL DATA ----------------
+# ---------------- INSERT DATA ----------------
 def seed_data():
     conn = get_db()
     cur = conn.cursor()
@@ -81,7 +82,7 @@ def seed_data():
     conn.commit()
     conn.close()
 
-# ---------------- INITIALIZE DB ----------------
+# Initialize DB
 if not os.path.exists(DB_NAME):
     init_db()
     seed_data()
@@ -123,11 +124,21 @@ def get_aqi():
     next48 = max(30, tomorrow + random.randint(-25, 25))
 
     if today <= 50:
-        status, level = "Safe", "good"
+        status, level = "Good", "good"
     elif today <= 100:
-        status, level = "Caution", "moderate"
+        status, level = "Moderate", "moderate"
     else:
-        status, level = "Danger", "poor"
+        status, level = "Unhealthy", "poor"
+
+    pm25 = round(random.uniform(10, 150), 1)
+    pm10 = round(random.uniform(20, 180), 1)
+    co = round(random.uniform(1, 10), 1)
+    no2 = round(random.uniform(10, 120), 1)
+
+    temp = random.randint(20, 35)
+    humidity = random.randint(40, 85)
+    wind = random.randint(5, 25)
+    condition_weather = random.choice(["Clear", "Cloudy", "Hazy", "Windy"])
 
     precautions = {
         "Asthma": ["Carry inhaler", "Wear N95 mask", "Avoid exertion"],
@@ -144,9 +155,17 @@ def get_aqi():
         "level": level,
         "suitability": f"AQI is {status.lower()} for {disease} patients.",
         "precautions": precautions[disease],
-        "hospitals": hospitals
+        "hospitals": hospitals,
+        "pm25": pm25,
+        "pm10": pm10,
+        "co": co,
+        "no2": no2,
+        "temp": temp,
+        "humidity": humidity,
+        "wind": wind,
+        "conditionWeather": condition_weather,
+        "updated": datetime.now().strftime("%I:%M:%S %p")
     })
 
-# ---------------- RUN ----------------
 if __name__ == "__main__":
     app.run(debug=True)
