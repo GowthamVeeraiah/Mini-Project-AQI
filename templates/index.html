@@ -1,232 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Air Quality Monitoring System</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Segoe UI,sans-serif}
-
-body{
-    background:#f3f4f6;
-    color:#333;
-}
-
-/* HEADER */
-.header{
-    background:white;
-    padding:20px 30px;
-    border-bottom:1px solid #ddd;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-.header h1{font-size:22px}
-.header small{color:gray}
-
-/* CONTAINER */
-.container{
-    max-width:1200px;
-    margin:auto;
-    padding:25px;
-}
-
-/* CARD */
-.card{
-    background:white;
-    border-radius:12px;
-    padding:20px;
-    margin-bottom:20px;
-    border:1px solid #e5e7eb;
-}
-
-/* GRID */
-.grid{
-    display:grid;
-    gap:20px;
-}
-.grid-2{grid-template-columns:2fr 1fr}
-.grid-4{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-
-/* AQI BOX */
-.aqi-value{
-    font-size:60px;
-    font-weight:bold;
-}
-.badge{
-    display:inline-block;
-    padding:6px 12px;
-    border-radius:20px;
-    font-size:14px;
-    margin-top:8px;
-}
+body{font-family:Segoe UI;background:#f3f4f6;margin:0}
+.header{background:#fff;padding:20px;display:flex;justify-content:space-between;border-bottom:1px solid #ddd}
+.container{max-width:1200px;margin:auto;padding:20px}
+.card{background:#fff;padding:20px;margin-bottom:20px;border-radius:10px;border:1px solid #e5e7eb}
+.grid{display:grid;gap:20px}
+.grid2{grid-template-columns:2fr 1fr}
+.grid4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.aqi-value{font-size:60px;font-weight:bold}
+.badge{padding:6px 12px;border-radius:20px;font-size:14px}
 .good{background:#d1fae5;color:#065f46}
 .moderate{background:#fef3c7;color:#92400e}
 .poor{background:#fee2e2;color:#7f1d1d}
-
-/* POLLUTANT CARD */
-.pollutant{
-    font-size:14px;
-}
-.pollutant h4{margin-bottom:8px}
-
-/* BUTTON */
-button{
-    padding:8px 12px;
-    border:none;
-    background:#2563eb;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-}
-button:hover{opacity:.9}
-
-select{
-    padding:6px;
-    margin-left:10px;
-}
-
-footer{
-    text-align:center;
-    padding:15px;
-    font-size:13px;
-    color:gray;
-}
+button{padding:8px 12px;background:#2563eb;color:white;border:none;border-radius:6px}
+select{padding:6px}
 </style>
 </head>
-
 <body>
 
 <div class="header">
-    <div>
-        <h1>Air Quality Monitoring System</h1>
-        <small>Real-time environmental monitoring and health recommendations</small>
-    </div>
-    <small id="updatedTime"></small>
+<div>
+<h2>Air Quality Monitoring System</h2>
+<small>Real-time environmental monitoring</small>
+</div>
+<small id="updated"></small>
 </div>
 
 <div class="container">
 
-<!-- LOCATION -->
 <div class="card">
-    <b>Current Location:</b>
-    <select id="city">
-        <option>Bengaluru Urban</option>
-        <option>Mysuru</option>
-        <option>Hassan</option>
-        <option>Tumakuru</option>
-    </select>
-    <button onclick="analyze()">Update</button>
+<select id="city"></select>
+<select id="condition">
+<option>Asthma</option>
+<option>COPD</option>
+<option>Bronchitis</option>
+<option>Allergic Rhinitis</option>
+</select>
+<button onclick="analyze()">Analyze</button>
 </div>
 
-<!-- AQI + WEATHER -->
-<div class="grid grid-2">
-
+<div class="grid grid2">
 <div class="card">
-    <h3>Air Quality Index (AQI)</h3>
-    <div id="aqiValue" class="aqi-value">--</div>
-    <div id="aqiStatus" class="badge moderate">--</div>
-    <p id="aqiDescription" style="margin-top:10px;font-size:14px;color:#555"></p>
+<h3>AQI</h3>
+<div id="aqi" class="aqi-value">--</div>
+<div id="status" class="badge">--</div>
+<p id="suitability"></p>
 </div>
 
 <div class="card">
-    <h3>Current Weather</h3>
-    <p>🌡 Temperature: <b id="temp">--</b> °C</p>
-    <p>💧 Humidity: <b id="humidity">--</b> %</p>
-    <p>🌬 Wind: <b id="wind">--</b> km/h</p>
-    <p>☁ Condition: <b id="conditionWeather">--</b></p>
+<h3>Weather</h3>
+<p>Temp: <b id="temp"></b>°C</p>
+<p>Humidity: <b id="humidity"></b>%</p>
+<p>Wind: <b id="wind"></b> km/h</p>
+<p>Condition: <b id="conditionWeather"></b></p>
+</div>
 </div>
 
+<div class="grid grid4">
+<div class="card"><h4>PM2.5</h4><p id="pm25"></p></div>
+<div class="card"><h4>PM10</h4><p id="pm10"></p></div>
+<div class="card"><h4>CO</h4><p id="co"></p></div>
+<div class="card"><h4>NO2</h4><p id="no2"></p></div>
 </div>
 
-<!-- POLLUTANTS -->
-<div class="grid grid-4">
-
-<div class="card pollutant">
-    <h4>PM2.5</h4>
-    <p id="pm25">--</p>
-</div>
-
-<div class="card pollutant">
-    <h4>PM10</h4>
-    <p id="pm10">--</p>
-</div>
-
-<div class="card pollutant">
-    <h4>CO</h4>
-    <p id="co">--</p>
-</div>
-
-<div class="card pollutant">
-    <h4>NO₂</h4>
-    <p id="no2">--</p>
-</div>
-
-</div>
-
-<!-- TREND GRAPH -->
 <div class="card">
-    <h3>24-Hour Trend</h3>
-    <canvas id="trendChart"></canvas>
+<h3>Hospitals</h3>
+<ul id="hospitals"></ul>
 </div>
 
-<!-- HEALTH RECOMMENDATION -->
 <div class="card">
-    <h3>Health Recommendations</h3>
-    <ul id="recommendations"></ul>
+<h3>Precautions</h3>
+<ul id="precautions"></ul>
 </div>
 
 </div>
-
-<footer>
-© 2026 BreathSafe | Created by Gowtham
-</footer>
 
 <script>
-const ctx = document.getElementById("trendChart");
-let chart = new Chart(ctx, {
-    type:"line",
-    data:{
-        labels:["1AM","4AM","8AM","12PM","4PM","8PM","12AM"],
-        datasets:[{
-            label:"AQI",
-            data:[60,70,65,80,75,90,85],
-            borderColor:"#6366f1",
-            fill:false,
-            tension:0.4
-        }]
-    }
+const districts = [
+"Bagalkote","Ballari","Belagavi","Bengaluru Urban","Bengaluru Rural",
+"Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru",
+"Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag",
+"Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya",
+"Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi",
+"Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"
+];
+
+districts.forEach(d=>{
+let opt=document.createElement("option");
+opt.text=d;
+city.add(opt);
 });
 
 function analyze(){
-    fetch("/getAQI",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({city:city.value})
-    })
-    .then(res=>res.json())
-    .then(data=>{
+fetch("/getAQI",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({city:city.value,condition:condition.value})
+})
+.then(res=>res.json())
+.then(data=>{
+aqi.innerText=data.today;
+status.innerText=data.status;
+status.className="badge "+data.level;
+suitability.innerText=data.suitability;
 
-        document.getElementById("aqiValue").innerText=data.today;
-        document.getElementById("aqiStatus").innerText=data.status;
-        document.getElementById("aqiStatus").className="badge "+data.level;
-        document.getElementById("aqiDescription").innerText=data.suitability;
+pm25.innerText=data.pm25+" µg/m³";
+pm10.innerText=data.pm10+" µg/m³";
+co.innerText=data.co+" ppm";
+no2.innerText=data.no2+" ppb";
 
-        pm25.innerText=data.pm25+" µg/m³";
-        pm10.innerText=data.pm10+" µg/m³";
-        co.innerText=data.co+" ppm";
-        no2.innerText=data.no2+" ppb";
+temp.innerText=data.temp;
+humidity.innerText=data.humidity;
+wind.innerText=data.wind;
+conditionWeather.innerText=data.conditionWeather;
 
-        recommendations.innerHTML="";
-        data.precautions.forEach(p=>{
-            recommendations.innerHTML+=`<li>${p}</li>`;
-        });
+updated.innerText="Last Updated: "+data.updated;
 
-        updatedTime.innerText="Last updated: "+new Date().toLocaleTimeString();
-    });
+hospitals.innerHTML="";
+data.hospitals.forEach(h=>{
+hospitals.innerHTML+=`<li><b>${h.hospital_name}</b><br>${h.address}</li>`;
+});
+
+precautions.innerHTML="";
+data.precautions.forEach(p=>{
+precautions.innerHTML+=`<li>${p}</li>`;
+});
+});
 }
 </script>
 
