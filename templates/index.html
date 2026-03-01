@@ -2,197 +2,86 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Air Quality Monitoring System</title>
+<title>BreathSafe Aura</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Inter',sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 
 body{
-display:flex;
-background:#f5f7fb;
-color:#1f2937;
+background:linear-gradient(135deg,#fdf2f8,#e0f2fe);
+color:#1e293b;
 }
 
-/* SIDEBAR */
-.sidebar{
-width:240px;
-background:#111827;
-color:white;
-height:100vh;
-padding:30px 20px;
-position:fixed;
-}
-
-.sidebar h2{
-margin-bottom:40px;
-font-weight:700;
-}
-
-.sidebar ul{
-list-style:none;
-}
-
-.sidebar li{
-margin-bottom:20px;
-opacity:.8;
-cursor:pointer;
-}
-
-.sidebar li:hover{
-opacity:1;
-}
-
-/* MAIN */
-.main{
-margin-left:240px;
-width:100%;
-padding:30px;
-}
-
-/* HEADER */
 .header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:30px;
-}
-
-.header h1{
-font-size:24px;
+text-align:center;
+padding:30px;
+font-size:28px;
 font-weight:700;
+color:#db2777;
 }
 
-.updated{
-font-size:14px;
-color:#6b7280;
+.container{
+max-width:1200px;
+margin:auto;
+padding:20px;
 }
 
-/* CARD */
 .card{
-background:white;
+background:rgba(255,255,255,0.7);
+backdrop-filter:blur(15px);
+border-radius:25px;
 padding:25px;
-border-radius:16px;
-box-shadow:0 8px 24px rgba(0,0,0,0.05);
 margin-bottom:25px;
+box-shadow:0 15px 35px rgba(0,0,0,0.1);
 }
 
-/* GRID */
-.grid{
-display:grid;
-gap:25px;
-}
-
-.grid-2{
-grid-template-columns:2fr 1fr;
-}
-
-.grid-4{
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-}
-
-/* AQI */
-.aqi-value{
-font-size:72px;
-font-weight:700;
-}
-
-.badge{
-display:inline-block;
-padding:8px 16px;
-border-radius:30px;
-font-size:14px;
-margin-top:10px;
-}
-
-.good{
-background:#dcfce7;
-color:#166534;
-}
-
-.moderate{
-background:#fef9c3;
-color:#854d0e;
-}
-
-.poor{
-background:#fee2e2;
-color:#7f1d1d;
-}
-
-/* SELECT */
 .controls{
 display:flex;
 gap:15px;
-margin-bottom:25px;
+margin-bottom:20px;
 }
 
 select,button{
-padding:10px 14px;
-border-radius:8px;
-border:1px solid #d1d5db;
-font-size:14px;
+padding:10px 15px;
+border-radius:20px;
+border:none;
 }
 
 button{
-background:#2563eb;
+background:#db2777;
 color:white;
-border:none;
 cursor:pointer;
 }
 
-button:hover{
-opacity:.9;
+.grid{
+display:grid;
+gap:20px;
 }
 
-.metric h4{
-font-size:14px;
-margin-bottom:8px;
-color:#6b7280;
+.grid-4{
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 }
 
-.metric p{
-font-size:20px;
-font-weight:600;
+.aqi{
+font-size:70px;
+font-weight:700;
+color:#be185d;
 }
 
-ul{
-margin-top:10px;
-padding-left:18px;
-}
-
-li{
-margin-bottom:6px;
-font-size:14px;
-}
+ul{margin-top:10px;padding-left:20px;}
+li{margin-bottom:6px;}
 </style>
 </head>
 
 <body>
 
-<div class="sidebar">
-<h2>BreathSafe</h2>
-<ul>
-<li>Dashboard</li>
-<li>Analytics</li>
-<li>Health Advisory</li>
-<li>Hospitals</li>
-<li>Settings</li>
-</ul>
-</div>
-
-<div class="main">
-
 <div class="header">
-<h1>Air Quality Monitoring System</h1>
-<div class="updated" id="updated"></div>
+🌸 BreathSafe Aura – Air Quality & Health Care
 </div>
+
+<div class="container">
 
 <div class="controls">
 <select id="city"></select>
@@ -202,65 +91,36 @@ font-size:14px;
 <option>Bronchitis</option>
 <option>Allergic Rhinitis</option>
 </select>
-<button onclick="analyze()">Analyze</button>
+<button onclick="analyze()">Check AQI</button>
 </div>
-
-<div class="grid grid-2">
 
 <div class="card">
 <h3>Air Quality Index</h3>
-<div id="aqi" class="aqi-value">--</div>
-<div id="status" class="badge">--</div>
-<p id="suitability" style="margin-top:10px;color:#6b7280;"></p>
-</div>
-
-<div class="card">
-<h3>Weather</h3>
-<p>Temperature: <b id="temp"></b> °C</p>
-<p>Humidity: <b id="humidity"></b> %</p>
-<p>Wind: <b id="wind"></b> km/h</p>
-<p>Condition: <b id="conditionWeather"></b></p>
-</div>
-
+<div id="aqi" class="aqi">--</div>
+<p id="status"></p>
+<p id="updated"></p>
 </div>
 
 <div class="grid grid-4">
-
-<div class="card metric">
-<h4>PM2.5</h4>
-<p id="pm25"></p>
-</div>
-
-<div class="card metric">
-<h4>PM10</h4>
-<p id="pm10"></p>
-</div>
-
-<div class="card metric">
-<h4>CO</h4>
-<p id="co"></p>
-</div>
-
-<div class="card metric">
-<h4>NO2</h4>
-<p id="no2"></p>
-</div>
-
+<div class="card"><h4>PM2.5</h4><p id="pm25"></p></div>
+<div class="card"><h4>PM10</h4><p id="pm10"></p></div>
+<div class="card"><h4>CO</h4><p id="co"></p></div>
+<div class="card"><h4>NO₂</h4><p id="no2"></p></div>
 </div>
 
 <div class="card">
-<h3>24-Hour AQI Trend</h3>
+<h3>Next 24 Hours AQI Prediction</h3>
 <canvas id="aqiChart"></canvas>
-</div>
-
-<div class="card">
-<h3>Nearby Hospitals</h3>
-<ul id="hospitals"></ul>
 </div>
 
 <div class="card">
 <h3>Precautionary Measures</h3>
 <ul id="precautions"></ul>
+</div>
+
+<div class="card">
+<h3>Nearby Hospitals</h3>
+<ul id="hospitals"></ul>
 </div>
 
 </div>
@@ -283,21 +143,18 @@ city.add(opt);
 
 let chart;
 
-function createChart(dataPoints){
+function createChart(data){
 const ctx=document.getElementById("aqiChart").getContext("2d");
 if(chart){chart.destroy();}
 chart=new Chart(ctx,{
 type:"line",
 data:{
 labels:["1AM","4AM","7AM","10AM","1PM","4PM","7PM","10PM"],
-datasets:[{
-label:"AQI",
-data:dataPoints,
-borderColor:"#2563eb",
-backgroundColor:"rgba(37,99,235,0.1)",
-fill:true,
-tension:0.4
-}]
+datasets:[
+{label:"AQI",data:data,borderColor:"#db2777",fill:false},
+{label:"PM2.5",data:data.map(v=>v-20),borderColor:"#7c3aed",fill:false},
+{label:"PM10",data:data.map(v=>v+10),borderColor:"#0ea5e9",fill:false}
+]
 },
 options:{responsive:true}
 });
@@ -313,29 +170,21 @@ body:JSON.stringify({city:city.value,condition:condition.value})
 .then(data=>{
 aqi.innerText=data.today;
 status.innerText=data.status;
-status.className="badge "+data.level;
-suitability.innerText=data.suitability;
+updated.innerText="Updated: "+data.updated;
 
 pm25.innerText=data.pm25+" µg/m³";
 pm10.innerText=data.pm10+" µg/m³";
 co.innerText=data.co+" ppm";
 no2.innerText=data.no2+" ppb";
 
-temp.innerText=data.temp;
-humidity.innerText=data.humidity;
-wind.innerText=data.wind;
-conditionWeather.innerText=data.conditionWeather;
-
-updated.innerText="Last Updated: "+data.updated;
+precautions.innerHTML="";
+data.precautions.forEach(p=>{
+precautions.innerHTML+=`<li>${p}</li>`;
+});
 
 hospitals.innerHTML="";
 data.hospitals.forEach(h=>{
 hospitals.innerHTML+=`<li><b>${h.hospital_name}</b><br>${h.address}</li>`;
-});
-
-precautions.innerHTML="";
-data.precautions.forEach(p=>{
-precautions.innerHTML+=`<li>${p}</li>`;
 });
 
 createChart(data.trend);
