@@ -1,196 +1,774 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BreathSafe Aura</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-
-body{
-background:linear-gradient(135deg,#fdf2f8,#e0f2fe);
-color:#1e293b;
+:root{
+  --bg:#07111f;
+  --bg-soft:#0e1c32;
+  --panel:rgba(10,18,35,0.72);
+  --panel-strong:rgba(7,13,27,0.9);
+  --line:rgba(255,255,255,0.09);
+  --text:#e6eef8;
+  --muted:#94a3b8;
+  --good:#22c55e;
+  --moderate:#f59e0b;
+  --poor:#ef4444;
+  --accent:#38bdf8;
+  --accent-2:#8b5cf6;
+  --accent-3:#2dd4bf;
+  --shadow:0 24px 60px rgba(2,6,23,0.45);
 }
 
-.header{
-text-align:center;
-padding:30px;
-font-size:28px;
-font-weight:700;
-color:#db2777;
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  min-height:100vh;
+  font-family:'Outfit',sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(45,212,191,0.18), transparent 28%),
+    radial-gradient(circle at 80% 12%, rgba(56,189,248,0.18), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(139,92,246,0.22), transparent 30%),
+    linear-gradient(135deg, #030712 0%, #07111f 45%, #0e1c32 100%);
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size:48px 48px;
+  mask-image:linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 92%);
 }
 
 .container{
-max-width:1200px;
-margin:auto;
-padding:20px;
+  width:min(1240px, calc(100% - 32px));
+  margin:0 auto;
+  padding:32px 0 48px;
 }
 
+.hero{
+  position:relative;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:1.3fr 0.9fr;
+  gap:24px;
+  padding:32px;
+  border:1px solid var(--line);
+  border-radius:32px;
+  background:linear-gradient(145deg, rgba(10,18,35,0.88), rgba(9,19,38,0.65));
+  box-shadow:var(--shadow);
+}
+
+.hero::after{
+  content:"";
+  position:absolute;
+  width:280px;
+  height:280px;
+  right:-80px;
+  top:-80px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(56,189,248,0.28), transparent 70%);
+}
+
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 14px;
+  border-radius:999px;
+  color:#c8f6ff;
+  background:rgba(45,212,191,0.12);
+  border:1px solid rgba(45,212,191,0.2);
+  font-size:13px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+
+.hero h1{
+  margin-top:18px;
+  font-family:'Sora',sans-serif;
+  font-size:clamp(2.4rem, 5vw, 4.8rem);
+  line-height:0.95;
+  letter-spacing:-0.05em;
+}
+
+.hero p{
+  max-width:60ch;
+  margin-top:18px;
+  color:#bfd0e5;
+  font-size:1.05rem;
+  line-height:1.7;
+}
+
+.hero-stats{
+  margin-top:28px;
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:14px;
+}
+
+.stat-chip{
+  padding:16px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.stat-chip span{
+  display:block;
+  color:var(--muted);
+  font-size:0.85rem;
+}
+
+.stat-chip strong{
+  display:block;
+  margin-top:8px;
+  font-size:1.35rem;
+  font-weight:700;
+}
+
+.hero-panel{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  justify-content:space-between;
+  padding:24px;
+  border-radius:28px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.panel-label{
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  font-size:0.75rem;
+}
+
+.aqi-number{
+  font-size:clamp(4rem, 8vw, 6rem);
+  line-height:0.9;
+  font-weight:800;
+}
+
+.status-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  width:max-content;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:600;
+  border:1px solid transparent;
+}
+
+.status-pill::before{
+  content:"";
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:currentColor;
+  box-shadow:0 0 16px currentColor;
+}
+
+.status-pill.good{
+  color:#86efac;
+  background:rgba(34,197,94,0.14);
+  border-color:rgba(34,197,94,0.22);
+}
+
+.status-pill.moderate{
+  color:#fcd34d;
+  background:rgba(245,158,11,0.14);
+  border-color:rgba(245,158,11,0.22);
+}
+
+.status-pill.poor{
+  color:#fda4af;
+  background:rgba(239,68,68,0.14);
+  border-color:rgba(239,68,68,0.22);
+}
+
+.controls-card,
 .card{
-background:rgba(255,255,255,0.7);
-backdrop-filter:blur(15px);
-border-radius:25px;
-padding:25px;
-margin-bottom:25px;
-box-shadow:0 15px 35px rgba(0,0,0,0.1);
+  margin-top:24px;
+  padding:24px;
+  border-radius:28px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(18px);
 }
 
-.controls{
-display:flex;
-gap:15px;
-margin-bottom:20px;
+.controls-card{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  gap:16px;
+  align-items:end;
 }
 
-select,button{
-padding:10px 15px;
-border-radius:20px;
-border:none;
+.field label{
+  display:block;
+  margin-bottom:10px;
+  color:#c8d7e6;
+  font-size:0.9rem;
 }
 
-button{
-background:#db2777;
-color:white;
-cursor:pointer;
+.field select,
+.field button{
+  width:100%;
+  border:none;
+  border-radius:18px;
+  padding:15px 16px;
+  font:inherit;
 }
 
-.grid{
-display:grid;
-gap:20px;
+.field select{
+  color:var(--text);
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.08);
+  outline:none;
 }
 
-.grid-4{
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+.field button{
+  cursor:pointer;
+  color:#04111d;
+  font-weight:700;
+  background:linear-gradient(135deg, #67e8f9, #38bdf8 55%, #818cf8);
+  box-shadow:0 18px 32px rgba(56,189,248,0.28);
+  transition:transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.aqi{
-font-size:70px;
-font-weight:700;
-color:#be185d;
+.field button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 22px 38px rgba(56,189,248,0.36);
 }
 
-ul{margin-top:10px;padding-left:20px;}
-li{margin-bottom:6px;}
+.dashboard{
+  display:grid;
+  grid-template-columns:1.1fr 0.9fr;
+  gap:24px;
+  margin-top:24px;
+}
+
+.stack{
+  display:grid;
+  gap:24px;
+}
+
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.section-title h2,
+.section-title h3{
+  font-family:'Sora',sans-serif;
+  font-size:1.2rem;
+}
+
+.section-title p{
+  color:var(--muted);
+  font-size:0.92rem;
+}
+
+.metric-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:16px;
+}
+
+.metric{
+  position:relative;
+  overflow:hidden;
+  padding:18px;
+  border-radius:22px;
+  background:linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border:1px solid rgba(255,255,255,0.08);
+}
+
+.metric::after{
+  content:"";
+  position:absolute;
+  inset:auto -18px -28px auto;
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(56,189,248,0.2), transparent 70%);
+}
+
+.metric span{
+  color:var(--muted);
+  font-size:0.85rem;
+}
+
+.metric strong{
+  display:block;
+  margin-top:10px;
+  font-size:1.7rem;
+  font-weight:700;
+}
+
+.metric small{
+  display:block;
+  margin-top:8px;
+  color:#cbd5e1;
+}
+
+.weather-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:16px;
+}
+
+.weather-card{
+  padding:18px;
+  border-radius:22px;
+  background:linear-gradient(145deg, rgba(45,212,191,0.1), rgba(56,189,248,0.08));
+  border:1px solid rgba(125,211,252,0.18);
+}
+
+.weather-card span{
+  color:#b5c9dc;
+  font-size:0.85rem;
+}
+
+.weather-card strong{
+  display:block;
+  margin-top:12px;
+  font-size:1.6rem;
+}
+
+.chart-shell{
+  height:320px;
+}
+
+canvas{
+  width:100% !important;
+  height:100% !important;
+}
+
+.list-card ul{
+  list-style:none;
+  display:grid;
+  gap:12px;
+}
+
+.list-card li{
+  padding:16px 18px;
+  border-radius:18px;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);
+  color:#d8e4f1;
+  line-height:1.5;
+}
+
+.list-card li strong{
+  display:block;
+  margin-bottom:4px;
+}
+
+.hint{
+  color:var(--muted);
+  font-size:0.9rem;
+}
+
+@media (max-width: 1040px){
+  .hero,
+  .dashboard{
+    grid-template-columns:1fr;
+  }
+
+  .controls-card{
+    grid-template-columns:repeat(2, minmax(0,1fr));
+  }
+}
+
+@media (max-width: 720px){
+  .container{
+    width:min(100% - 20px, 1240px);
+    padding:20px 0 34px;
+  }
+
+  .hero,
+  .controls-card,
+  .card{
+    padding:18px;
+    border-radius:24px;
+  }
+
+  .controls-card,
+  .metric-grid,
+  .weather-grid,
+  .hero-stats{
+    grid-template-columns:1fr;
+  }
+
+  .aqi-number{
+    font-size:4.4rem;
+  }
+}
 </style>
 </head>
-
 <body>
-
-<div class="header">
-🌸 BreathSafe Aura – Air Quality & Health Care
-</div>
-
 <div class="container">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">BreathSafe Aura</div>
+      <h1>Breathe with more confidence, even on high-risk days.</h1>
+      <p>Track district-level air quality, understand how it affects respiratory conditions, and surface the right precautions and nearby hospitals in one calm, high-clarity dashboard.</p>
+      <div class="hero-stats">
+        <div class="stat-chip">
+          <span>Coverage</span>
+          <strong>31 districts</strong>
+        </div>
+        <div class="stat-chip">
+          <span>Focus</span>
+          <strong>Respiratory care</strong>
+        </div>
+        <div class="stat-chip">
+          <span>Signals</span>
+          <strong>AQI + weather</strong>
+        </div>
+      </div>
+    </div>
 
-<div class="controls">
-<select id="city"></select>
-<select id="condition">
-<option>Asthma</option>
-<option>COPD</option>
-<option>Bronchitis</option>
-<option>Allergic Rhinitis</option>
-</select>
-<button onclick="analyze()">Check AQI</button>
-</div>
+    <div class="hero-panel">
+      <div>
+        <div class="panel-label">Live AQI Snapshot</div>
+        <div id="aqi" class="aqi-number">--</div>
+        <div id="statusPill" class="status-pill moderate">Waiting for analysis</div>
+      </div>
+      <div>
+        <div id="statusText" style="font-size:1.05rem;font-weight:600;">Select a district and condition to generate a health-focused report.</div>
+        <div id="updated" class="hint" style="margin-top:8px;">No update yet</div>
+      </div>
+    </div>
+  </section>
 
-<div class="card">
-<h3>Air Quality Index</h3>
-<div id="aqi" class="aqi">--</div>
-<p id="status"></p>
-<p id="updated"></p>
-</div>
+  <section class="controls-card">
+    <div class="field">
+      <label for="city">District</label>
+      <select id="city"></select>
+    </div>
+    <div class="field">
+      <label for="condition">Condition</label>
+      <select id="condition">
+        <option>Asthma</option>
+        <option>COPD</option>
+        <option>Bronchitis</option>
+        <option>Allergic Rhinitis</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="focus">Care Lens</label>
+      <select id="focus" disabled>
+        <option>Protection mode active</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>&nbsp;</label>
+      <button type="button" onclick="analyze()">Generate Health View</button>
+    </div>
+  </section>
 
-<div class="grid grid-4">
-<div class="card"><h4>PM2.5</h4><p id="pm25"></p></div>
-<div class="card"><h4>PM10</h4><p id="pm10"></p></div>
-<div class="card"><h4>CO</h4><p id="co"></p></div>
-<div class="card"><h4>NO₂</h4><p id="no2"></p></div>
-</div>
+  <section class="dashboard">
+    <div class="stack">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Pollution fingerprint</h2>
+            <p>Key pollutants influencing the current air-quality signal.</p>
+          </div>
+        </div>
+        <div class="metric-grid">
+          <div class="metric">
+            <span>PM2.5</span>
+            <strong id="pm25">--</strong>
+            <small>Fine particles with deep lung impact</small>
+          </div>
+          <div class="metric">
+            <span>PM10</span>
+            <strong id="pm10">--</strong>
+            <small>Dust and coarse particle concentration</small>
+          </div>
+          <div class="metric">
+            <span>Carbon Monoxide</span>
+            <strong id="co">--</strong>
+            <small>Traffic-linked combustion indicator</small>
+          </div>
+          <div class="metric">
+            <span>Nitrogen Dioxide</span>
+            <strong id="no2">--</strong>
+            <small>Useful proxy for roadside exposure</small>
+          </div>
+        </div>
+      </div>
 
-<div class="card">
-<h3>Next 24 Hours AQI Prediction</h3>
-<canvas id="aqiChart"></canvas>
-</div>
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h2>Next 24-hour outlook</h2>
+            <p>Projected AQI rhythm across the day to help plan safer outdoor time.</p>
+          </div>
+        </div>
+        <div class="chart-shell">
+          <canvas id="aqiChart"></canvas>
+        </div>
+      </div>
+    </div>
 
-<div class="card">
-<h3>Precautionary Measures</h3>
-<ul id="precautions"></ul>
-</div>
+    <div class="stack">
+      <div class="card">
+        <div class="section-title">
+          <div>
+            <h3>Weather context</h3>
+            <p>Ambient conditions that can intensify or soften respiratory discomfort.</p>
+          </div>
+        </div>
+        <div class="weather-grid">
+          <div class="weather-card">
+            <span>Temperature</span>
+            <strong id="temp">--</strong>
+          </div>
+          <div class="weather-card">
+            <span>Humidity</span>
+            <strong id="humidity">--</strong>
+          </div>
+          <div class="weather-card">
+            <span>Wind</span>
+            <strong id="wind">--</strong>
+          </div>
+        </div>
+        <p id="conditionWeather" class="hint" style="margin-top:16px;">Weather summary will appear here.</p>
+      </div>
 
-<div class="card">
-<h3>Nearby Hospitals</h3>
-<ul id="hospitals"></ul>
-</div>
+      <div class="card list-card">
+        <div class="section-title">
+          <div>
+            <h3>Precautionary measures</h3>
+            <p>Tailored guidance for the selected respiratory condition.</p>
+          </div>
+        </div>
+        <ul id="precautions">
+          <li>Choose a district and condition to view recommended precautions.</li>
+        </ul>
+      </div>
 
+      <div class="card list-card">
+        <div class="section-title">
+          <div>
+            <h3>Nearby hospitals</h3>
+            <p>Local care options associated with the selected district.</p>
+          </div>
+        </div>
+        <ul id="hospitals">
+          <li>Hospital information will appear after analysis.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
 </div>
 
 <script>
-const districts=[
-"Bagalkote","Ballari","Belagavi","Bengaluru Urban","Bengaluru Rural",
-"Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru",
-"Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag",
-"Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya",
-"Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi",
-"Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"
+const districts = [
+  "Bagalkote","Ballari","Belagavi","Bengaluru Urban","Bengaluru Rural",
+  "Bidar","Chamarajanagar","Chikkaballapura","Chikkamagaluru",
+  "Chitradurga","Dakshina Kannada","Davanagere","Dharwad","Gadag",
+  "Hassan","Haveri","Kalaburagi","Kodagu","Kolar","Koppal","Mandya",
+  "Mysuru","Raichur","Ramanagara","Shivamogga","Tumakuru","Udupi",
+  "Uttara Kannada","Vijayanagara","Vijayapura","Yadgir"
 ];
 
-districts.forEach(d=>{
-let opt=document.createElement("option");
-opt.text=d;
-city.add(opt);
-});
+const city = document.getElementById("city");
+const condition = document.getElementById("condition");
+const aqi = document.getElementById("aqi");
+const statusPill = document.getElementById("statusPill");
+const statusText = document.getElementById("statusText");
+const updated = document.getElementById("updated");
+const pm25 = document.getElementById("pm25");
+const pm10 = document.getElementById("pm10");
+const co = document.getElementById("co");
+const no2 = document.getElementById("no2");
+const temp = document.getElementById("temp");
+const humidity = document.getElementById("humidity");
+const wind = document.getElementById("wind");
+const conditionWeather = document.getElementById("conditionWeather");
+const precautions = document.getElementById("precautions");
+const hospitals = document.getElementById("hospitals");
+
+for (const district of districts) {
+  const option = document.createElement("option");
+  option.value = district;
+  option.textContent = district;
+  city.appendChild(option);
+}
 
 let chart;
 
-function createChart(data){
-const ctx=document.getElementById("aqiChart").getContext("2d");
-if(chart){chart.destroy();}
-chart=new Chart(ctx,{
-type:"line",
-data:{
-labels:["1AM","4AM","7AM","10AM","1PM","4PM","7PM","10PM"],
-datasets:[
-{label:"AQI",data:data,borderColor:"#db2777",fill:false},
-{label:"PM2.5",data:data.map(v=>v-20),borderColor:"#7c3aed",fill:false},
-{label:"PM10",data:data.map(v=>v+10),borderColor:"#0ea5e9",fill:false}
-]
-},
-options:{responsive:true}
-});
+function getStatusClass(level) {
+  if (level === "good") return "good";
+  if (level === "moderate") return "moderate";
+  return "poor";
 }
 
-function analyze(){
-fetch("/getAQI",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({city:city.value,condition:condition.value})
-})
-.then(res=>res.json())
-.then(data=>{
-aqi.innerText=data.today;
-status.innerText=data.status;
-updated.innerText="Updated: "+data.updated;
+function createChart(data) {
+  const ctx = document.getElementById("aqiChart").getContext("2d");
+  if (chart) chart.destroy();
 
-pm25.innerText=data.pm25+" µg/m³";
-pm10.innerText=data.pm10+" µg/m³";
-co.innerText=data.co+" ppm";
-no2.innerText=data.no2+" ppb";
+  const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+  gradient.addColorStop(0, "rgba(56, 189, 248, 0.35)");
+  gradient.addColorStop(1, "rgba(56, 189, 248, 0)");
 
-precautions.innerHTML="";
-data.precautions.forEach(p=>{
-precautions.innerHTML+=`<li>${p}</li>`;
-});
+  chart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: ["1 AM", "4 AM", "7 AM", "10 AM", "1 PM", "4 PM", "7 PM", "10 PM"],
+      datasets: [
+        {
+          label: "AQI",
+          data,
+          borderColor: "#67e8f9",
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.38,
+          borderWidth: 3,
+          pointRadius: 4,
+          pointBackgroundColor: "#e0f2fe"
+        },
+        {
+          label: "PM2.5 signal",
+          data: data.map((value) => Math.max(value - 18, 10)),
+          borderColor: "#c084fc",
+          fill: false,
+          tension: 0.34,
+          borderDash: [6, 6],
+          pointRadius: 0
+        },
+        {
+          label: "PM10 signal",
+          data: data.map((value) => value + 10),
+          borderColor: "#2dd4bf",
+          fill: false,
+          tension: 0.34,
+          borderDash: [4, 5],
+          pointRadius: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: "#cbd5e1",
+            usePointStyle: true,
+            boxWidth: 10,
+            padding: 18
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: "#94a3b8" },
+          grid: { color: "rgba(148, 163, 184, 0.08)" }
+        },
+        y: {
+          ticks: { color: "#94a3b8" },
+          grid: { color: "rgba(148, 163, 184, 0.08)" }
+        }
+      }
+    }
+  });
+}
 
-hospitals.innerHTML="";
-data.hospitals.forEach(h=>{
-hospitals.innerHTML+=`<li><b>${h.hospital_name}</b><br>${h.address}</li>`;
-});
+function renderPrecautions(items) {
+  precautions.innerHTML = "";
+  if (!items.length) {
+    precautions.innerHTML = "<li>No precautions available for this condition yet.</li>";
+    return;
+  }
 
-createChart(data.trend);
-});
+  for (const item of items) {
+    const li = document.createElement("li");
+    li.textContent = item;
+    precautions.appendChild(li);
+  }
+}
+
+function renderHospitals(items) {
+  hospitals.innerHTML = "";
+  if (!items.length) {
+    hospitals.innerHTML = "<li>No hospitals found for this district.</li>";
+    return;
+  }
+
+  for (const hospital of items) {
+    const li = document.createElement("li");
+    li.innerHTML = `<strong>${hospital.hospital_name}</strong>${hospital.address}`;
+    hospitals.appendChild(li);
+  }
+}
+
+function analyze() {
+  fetch("/getAQI", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      city: city.value,
+      condition: condition.value
+    })
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      aqi.textContent = data.today;
+      statusPill.className = `status-pill ${getStatusClass(data.level)}`;
+      statusPill.textContent = data.status;
+      statusText.textContent = `${condition.value} support view for ${city.value}`;
+      updated.textContent = `Updated at ${data.updated}`;
+
+      pm25.textContent = `${data.pm25} ug/m3`;
+      pm10.textContent = `${data.pm10} ug/m3`;
+      co.textContent = `${data.co} ppm`;
+      no2.textContent = `${data.no2} ppb`;
+
+      temp.textContent = `${data.temp} C`;
+      humidity.textContent = `${data.humidity}%`;
+      wind.textContent = `${data.wind} km/h`;
+      conditionWeather.textContent = `Atmosphere: ${data.conditionWeather}. Pair this with the AQI trend before planning outdoor activity.`;
+
+      renderPrecautions(data.precautions || []);
+      renderHospitals(data.hospitals || []);
+      createChart(data.trend || []);
+    })
+    .catch((error) => {
+      console.error("Error fetching AQI:", error);
+      alert("Failed to fetch AQI data. Please check your Flask server and try again.");
+    });
 }
 </script>
-
 </body>
 </html>
