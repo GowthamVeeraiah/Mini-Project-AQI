@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, render_template, request, jsonify
 import os
 import random
 import sqlite3
@@ -92,7 +92,7 @@ if not os.path.exists(DB_NAME):
 
 @app.route("/")
 def home():
-    return send_from_directory(BASE_DIR, "index.html")
+    return render_template("index.html")
 
 
 @app.route("/health")
