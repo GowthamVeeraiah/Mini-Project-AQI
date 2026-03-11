@@ -9,7 +9,134 @@ DB_NAME = os.path.join(BASE_DIR, "breathsafe.db")
 
 app = Flask(__name__)
 
-DISTRICTS = [
+DISTRICT_HOSPITALS = {
+    "Bagalkote": {
+        "hospital_name": "District Hospital Bagalkote",
+        "address": "Navanagar, Bagalkote, Karnataka"
+    },
+    "Ballari": {
+        "hospital_name": "VIMS District Hospital Ballari",
+        "address": "Cantonment Area, Ballari, Karnataka"
+    },
+    "Belagavi": {
+        "hospital_name": "District Hospital Belagavi",
+        "address": "Ayodhya Nagar, Belagavi, Karnataka"
+    },
+    "Bengaluru Urban": {
+        "hospital_name": "Bowring and Lady Curzon Hospital",
+        "address": "Shivajinagar, Bengaluru Urban, Karnataka"
+    },
+    "Bengaluru Rural": {
+        "hospital_name": "District Hospital Devanahalli",
+        "address": "Devanahalli, Bengaluru Rural, Karnataka"
+    },
+    "Bidar": {
+        "hospital_name": "District Hospital Bidar",
+        "address": "Near New Bus Stand, Bidar, Karnataka"
+    },
+    "Chamarajanagar": {
+        "hospital_name": "District Hospital Chamarajanagar",
+        "address": "Court Road, Chamarajanagar, Karnataka"
+    },
+    "Chikkaballapura": {
+        "hospital_name": "District Hospital Chikkaballapura",
+        "address": "KHB Colony, Chikkaballapura, Karnataka"
+    },
+    "Chikkamagaluru": {
+        "hospital_name": "District McGann Hospital",
+        "address": "M G Road, Chikkamagaluru, Karnataka"
+    },
+    "Chitradurga": {
+        "hospital_name": "District Hospital Chitradurga",
+        "address": "Holalkere Road, Chitradurga, Karnataka"
+    },
+    "Dakshina Kannada": {
+        "hospital_name": "Wenlock District Hospital",
+        "address": "Hampankatta, Mangaluru, Karnataka"
+    },
+    "Davanagere": {
+        "hospital_name": "District Hospital Davanagere",
+        "address": "Hadadi Road, Davanagere, Karnataka"
+    },
+    "Dharwad": {
+        "hospital_name": "District Hospital Dharwad",
+        "address": "College Road, Dharwad, Karnataka"
+    },
+    "Gadag": {
+        "hospital_name": "District Hospital Gadag",
+        "address": "K C Rani Road, Gadag, Karnataka"
+    },
+    "Hassan": {
+        "hospital_name": "Hassan Institute District Hospital",
+        "address": "B M Road, Hassan, Karnataka"
+    },
+    "Haveri": {
+        "hospital_name": "District Hospital Haveri",
+        "address": "PB Road, Haveri, Karnataka"
+    },
+    "Kalaburagi": {
+        "hospital_name": "District Hospital Kalaburagi",
+        "address": "Sedam Road, Kalaburagi, Karnataka"
+    },
+    "Kodagu": {
+        "hospital_name": "District Hospital Madikeri",
+        "address": "General Thimmaiah Circle, Madikeri, Karnataka"
+    },
+    "Kolar": {
+        "hospital_name": "District Hospital Kolar",
+        "address": "Tamaka Road, Kolar, Karnataka"
+    },
+    "Koppal": {
+        "hospital_name": "District Hospital Koppal",
+        "address": "Hospet Road, Koppal, Karnataka"
+    },
+    "Mandya": {
+        "hospital_name": "District Hospital Mandya",
+        "address": "M C Road, Mandya, Karnataka"
+    },
+    "Mysuru": {
+        "hospital_name": "K R Hospital Mysuru",
+        "address": "Sayyaji Rao Road, Mysuru, Karnataka"
+    },
+    "Raichur": {
+        "hospital_name": "District Hospital Raichur",
+        "address": "Station Road, Raichur, Karnataka"
+    },
+    "Ramanagara": {
+        "hospital_name": "District Hospital Ramanagara",
+        "address": "Ijoor, Ramanagara, Karnataka"
+    },
+    "Shivamogga": {
+        "hospital_name": "McGann District Hospital Shivamogga",
+        "address": "Sagar Road, Shivamogga, Karnataka"
+    },
+    "Tumakuru": {
+        "hospital_name": "District Hospital Tumakuru",
+        "address": "B H Road, Tumakuru, Karnataka"
+    },
+    "Udupi": {
+        "hospital_name": "District Hospital Udupi",
+        "address": "Ajjarkad, Udupi, Karnataka"
+    },
+    "Uttara Kannada": {
+        "hospital_name": "District Hospital Karwar",
+        "address": "Civil Hospital Road, Karwar, Karnataka"
+    },
+    "Vijayanagara": {
+        "hospital_name": "District Hospital Hosapete",
+        "address": "Hosapete, Vijayanagara, Karnataka"
+    },
+    "Vijayapura": {
+        "hospital_name": "District Hospital Vijayapura",
+        "address": "Solapur Road, Vijayapura, Karnataka"
+    },
+    "Yadgir": {
+        "hospital_name": "District Hospital Yadgir",
+        "address": "Shahapur Road, Yadgir, Karnataka"
+    }
+}
+
+DISTRICT_CENTERS = [
     "Bagalkote", "Ballari", "Belagavi", "Bengaluru Urban", "Bengaluru Rural",
     "Bidar", "Chamarajanagar", "Chikkaballapura", "Chikkamagaluru",
     "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag",
@@ -58,7 +185,7 @@ def seed_data():
     conn = get_db()
     cur = conn.cursor()
 
-    for district in DISTRICTS:
+    for district in DISTRICT_CENTERS:
         cur.execute(
             "INSERT OR IGNORE INTO districts(district_name) VALUES(?)",
             (district,),
@@ -69,16 +196,21 @@ def seed_data():
     rows = cur.fetchall()
 
     for row in rows:
+        district_name = row["district_name"]
+        hospital = DISTRICT_HOSPITALS.get(
+            district_name,
+            {
+                "hospital_name": f"District Hospital {district_name}",
+                "address": f"Main Road, {district_name}, Karnataka",
+            },
+        )
+
         cur.execute(
             """
             INSERT OR IGNORE INTO hospitals(hospital_name, address, district_id)
             VALUES(?, ?, ?)
             """,
-            (
-                f"District General Hospital {row['district_name']}",
-                f"Main Road, {row['district_name']}, Karnataka",
-                row["district_id"],
-            ),
+            (hospital["hospital_name"], hospital["address"], row["district_id"]),
         )
 
     conn.commit()
@@ -158,7 +290,7 @@ def get_aqi():
             "Take steam inhalation",
         ],
         "Allergic Rhinitis": [
-            "Avoid pollen & dust",
+            "Avoid pollen and dust",
             "Wash face after outdoor exposure",
             "Use antihistamines if prescribed",
             "Keep windows closed during high pollution",
