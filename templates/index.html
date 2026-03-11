@@ -220,21 +220,7 @@
       color:var(--text);
       font-weight:600;
       background:linear-gradient(180deg, #1a2843, #121d31);
-      position:relative;
-      text-align:left;
-      padding-right:46px;
-    }
-
-    .location-btn::after{
-      content:"";
-      position:absolute;
-      right:18px;
-      top:50%;
-      width:9px;
-      height:9px;
-      border-right:2px solid #cbd5e1;
-      border-bottom:2px solid #cbd5e1;
-      transform:translateY(-65%) rotate(45deg);
+      text-align:center;
     }
 
     .location-btn:disabled{
@@ -434,11 +420,10 @@
         </select>
       </div>
 
- <div class="field">
-  <label for="locationBtn">Current Location</label>
-  <button id="locationBtn" type="button" class="location-btn" onclick="useLiveLocation()">Use Current Location</button>
-</div>
-
+      <div class="field">
+        <label for="locationBtn">Current Location</label>
+        <button id="locationBtn" type="button" class="location-btn" onclick="useLiveLocation()">Current Location</button>
+      </div>
 
       <div class="field">
         <label>&nbsp;</label>
@@ -697,7 +682,7 @@
 
     function useLiveLocation() {
       if (!navigator.geolocation) {
-        setLocationMessage("Live location is not supported in this browser.");
+        setLocationMessage("Current location is not supported in this browser.");
         return;
       }
 
@@ -712,7 +697,7 @@
           );
 
           city.value = nearestDistrict;
-          setLocationMessage(`Nearest district selected: ${nearestDistrict}`);
+          setLocationMessage(`Current location matched to ${nearestDistrict}`);
           locationBtn.disabled = false;
           analyze();
         },
@@ -723,7 +708,7 @@
             3: "Location request timed out."
           };
 
-          setLocationMessage(errors[error.code] || "Unable to read live location.");
+          setLocationMessage(errors[error.code] || "Unable to read current location.");
           locationBtn.disabled = false;
         },
         {
