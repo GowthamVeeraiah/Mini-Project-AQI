@@ -1,11 +1,22 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, jsonify, request, send_from_directory
 import os
 import random
 import sqlite3
 from datetime import datetime
 
-app = Flask(__name__, template_folder=os.path.dirname(os.path.abspath(__file__)))
-DB_NAME = "breathsafe.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_NAME = os.path.join(BASE_DIR, "breathsafe.db")
+
+app = Flask(__name__)
+
+DISTRICTS = [
+    "Bagalkote", "Ballari", "Belagavi", "Bengaluru Urban", "Bengaluru Rural",
+    "Bidar", "Chamarajanagar", "Chikkaballapura", "Chikkamagaluru",
+    "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag",
+    "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya",
+    "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi",
+    "Uttara Kannada", "Vijayanagara", "Vijayapura", "Yadgir"
+]
 
 
 def get_db():
@@ -41,16 +52,6 @@ def init_db():
 
     conn.commit()
     conn.close()
-
-
-DISTRICTS = [
-    "Bagalkote", "Ballari", "Belagavi", "Bengaluru Urban", "Bengaluru Rural",
-    "Bidar", "Chamarajanagar", "Chikkaballapura", "Chikkamagaluru",
-    "Chitradurga", "Dakshina Kannada", "Davanagere", "Dharwad", "Gadag",
-    "Hassan", "Haveri", "Kalaburagi", "Kodagu", "Kolar", "Koppal", "Mandya",
-    "Mysuru", "Raichur", "Ramanagara", "Shivamogga", "Tumakuru", "Udupi",
-    "Uttara Kannada", "Vijayanagara", "Vijayapura", "Yadgir"
-]
 
 
 def seed_data():
@@ -91,14 +92,22 @@ if not os.path.exists(DB_NAME):
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return send_from_directory(BASE_DIR, "index.html")
+
+
+@app.route("/health")
+def health():
+    return {"status": "ok"}
 
 
 @app.route("/getAQI", methods=["POST"])
 def get_aqi():
-    data = request.get_json() or {}
+    data = request.get_json(silent=True) or {}
     district = data.get("city")
     disease = data.get("condition")
+
+    if not district:
+        return jsonify({"error": "District is required"}), 400
 
     conn = get_db()
     cur = conn.cursor()
@@ -179,4 +188,3 @@ def get_aqi():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
