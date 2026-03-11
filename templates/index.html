@@ -229,6 +229,43 @@ body::before{
   font-size:0.9rem;
 }
 
+.field .location-button{
+  position:relative;
+  width:100%;
+  text-align:left;
+  color:rgba(230,238,248,0.9);
+  font-weight:500;
+  padding-right:48px;
+  background:linear-gradient(180deg, rgba(15,27,48,0.98), rgba(11,22,40,0.98));
+  border:1px solid rgba(255,255,255,0.08);
+  box-shadow:none;
+}
+
+.field .location-button::after{
+  content:"";
+  position:absolute;
+  right:18px;
+  top:50%;
+  width:9px;
+  height:9px;
+  border-right:2px solid rgba(203,213,225,0.9);
+  border-bottom:2px solid rgba(203,213,225,0.9);
+  transform:translateY(-65%) rotate(45deg);
+}
+
+.field .location-button:hover{
+  transform:none;
+  box-shadow:none;
+  border-color:rgba(103,232,249,0.32);
+  background:linear-gradient(180deg, rgba(18,31,54,1), rgba(12,24,43,1));
+}
+
+.field .location-button:disabled{
+  cursor:wait;
+  color:rgba(230,238,248,0.7);
+  opacity:1;
+}
+
 .field select,
 .field button{
   width:100%;
@@ -479,14 +516,12 @@ canvas{
       </select>
     </div>
     <div class="field">
-      <label for="focus">Care Lens</label>
-      <select id="focus" disabled>
-        <option>Protection mode active</option>
-      </select>
+      <label for="locationBtn">Live Location</label>
+      <button id="locationBtn" type="button" class="location-button" onclick="useLiveLocation()">Use live location</button>
     </div>
     <div class="field">
       <label>&nbsp;</label>
-      <button type="button" onclick="analyze()">Generate Health View</button>
+      <button type="button" onclick="analyze()">Generate Health Review</button>
     </div>
   </section>
 
@@ -614,6 +649,41 @@ const wind = document.getElementById("wind");
 const conditionWeather = document.getElementById("conditionWeather");
 const precautions = document.getElementById("precautions");
 const hospitals = document.getElementById("hospitals");
+const locationBtn = document.getElementById("locationBtn");
+
+const districtCenters = {
+  "Bagalkote": { lat: 16.18, lon: 75.7 },
+  "Ballari": { lat: 15.14, lon: 76.92 },
+  "Belagavi": { lat: 15.85, lon: 74.5 },
+  "Bengaluru Urban": { lat: 12.97, lon: 77.59 },
+  "Bengaluru Rural": { lat: 13.23, lon: 77.73 },
+  "Bidar": { lat: 17.91, lon: 77.52 },
+  "Chamarajanagar": { lat: 11.92, lon: 76.94 },
+  "Chikkaballapura": { lat: 13.44, lon: 77.73 },
+  "Chikkamagaluru": { lat: 13.32, lon: 75.77 },
+  "Chitradurga": { lat: 14.23, lon: 76.4 },
+  "Dakshina Kannada": { lat: 12.91, lon: 74.86 },
+  "Davanagere": { lat: 14.46, lon: 75.92 },
+  "Dharwad": { lat: 15.46, lon: 75.0 },
+  "Gadag": { lat: 15.43, lon: 75.63 },
+  "Hassan": { lat: 13.01, lon: 76.1 },
+  "Haveri": { lat: 14.8, lon: 75.4 },
+  "Kalaburagi": { lat: 17.33, lon: 76.83 },
+  "Kodagu": { lat: 12.42, lon: 75.74 },
+  "Kolar": { lat: 13.14, lon: 78.13 },
+  "Koppal": { lat: 15.35, lon: 76.15 },
+  "Mandya": { lat: 12.52, lon: 76.9 },
+  "Mysuru": { lat: 12.3, lon: 76.65 },
+  "Raichur": { lat: 16.2, lon: 77.37 },
+  "Ramanagara": { lat: 12.72, lon: 77.28 },
+  "Shivamogga": { lat: 13.93, lon: 75.57 },
+  "Tumakuru": { lat: 13.34, lon: 77.1 },
+  "Udupi": { lat: 13.34, lon: 74.74 },
+  "Uttara Kannada": { lat: 14.8, lon: 74.13 },
+  "Vijayanagara": { lat: 15.32, lon: 76.46 },
+  "Vijayapura": { lat: 16.83, lon: 75.71 },
+  "Yadgir": { lat: 16.77, lon: 77.14 }
+};
 
 for (const district of districts) {
   const option = document.createElement("option");
@@ -729,6 +799,85 @@ function renderHospitals(items) {
   }
 }
 
+function toRadians(value) {
+  return (value * Math.PI) / 180;
+}
+
+function getDistanceKm(lat1, lon1, lat2, lon2) {
+  const earthRadiusKm = 6371;
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  return earthRadiusKm * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function findNearestDistrict(lat, lon) {
+  let bestDistrict = districts[0];
+  let bestDistance = Number.POSITIVE_INFINITY;
+
+  for (const district of districts) {
+    const center = districtCenters[district];
+    if (!center) continue;
+
+    const distance = getDistanceKm(lat, lon, center.lat, center.lon);
+    if (distance < bestDistance) {
+      bestDistrict = district;
+      bestDistance = distance;
+    }
+  }
+
+  return { district: bestDistrict, distanceKm: bestDistance };
+}
+
+function setLocationMessage(message) {
+  statusText.textContent = message;
+}
+
+function useLiveLocation() {
+  if (!navigator.geolocation) {
+    setLocationMessage("Live location is not supported in this browser.");
+    return;
+  }
+
+  locationBtn.disabled = true;
+  setLocationMessage("Detecting your current location...");
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude } = position.coords;
+      const nearest = findNearestDistrict(latitude, longitude);
+
+      city.value = nearest.district;
+      setLocationMessage(
+        `Nearest district selected: ${nearest.district} (${nearest.distanceKm.toFixed(1)} km from district center).`
+      );
+      locationBtn.disabled = false;
+      analyze();
+    },
+    (error) => {
+      const errors = {
+        1: "Location access was denied. Please allow it in your browser.",
+        2: "Your location could not be determined right now.",
+        3: "Location request timed out. Please try again."
+      };
+
+      setLocationMessage(errors[error.code] || "Unable to read live location right now.");
+      locationBtn.disabled = false;
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+  );
+}
+
 function analyze() {
   fetch("/getAQI", {
     method: "POST",
@@ -769,6 +918,12 @@ function analyze() {
       alert("Failed to fetch AQI data. Please check your Flask server and try again.");
     });
 }
+
+
 </script>
 </body>
 </html>
+
+
+
+
